@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tournament Toolkit</title>
+<meta name="description" content="Practical browser-based tools for chess tournament organizers.">
+<style>
+:root{--orange:#f37324;--dark:#1e2329;--muted:#667085;--line:#e7e8eb;--bg:#f7f8fa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--dark);font:15px/1.5 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:#fff;border-bottom:1px solid var(--line);padding:18px max(22px,calc((100% - 1100px)/2));display:flex;align-items:center;gap:13px}
+.mark{width:46px;height:46px;border-radius:14px;background:var(--orange);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:800}
+.brand{font-weight:850;font-size:17px;letter-spacing:.01em}.sub{color:var(--muted);font-size:12px}
+main{max-width:1100px;margin:45px auto;padding:0 22px 70px}
+.hero{background:#20252b;border-radius:26px;padding:clamp(28px,6vw,64px);color:#fff;position:relative;overflow:hidden}
+.eyebrow{color:#ffb27c;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.13em}
+h1{font-size:clamp(34px,5vw,54px);line-height:1.05;letter-spacing:-.04em;max-width:680px;margin:16px 0}
+.hero p{color:#d7dbe0;max-width:590px;font-size:16px;margin:0}
+.sectionhead{margin:34px 0 16px;display:flex;align-items:end;justify-content:space-between;gap:16px}
+h2{font-size:22px;margin:0}.muted{color:var(--muted);font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;min-height:245px;box-shadow:0 5px 18px #10182808}
+.cardicon{width:48px;height:48px;border-radius:14px;background:#fff0e5;color:#bd4f0a;display:grid;place-items:center;font-size:24px}
+.card h3{font-size:18px;margin:18px 0 6px}.card p{color:var(--muted);font-size:14px;margin:0 0 20px;flex:1}
+.link{display:inline-flex;align-items:center;gap:8px;color:#b54d0b;font-weight:800;text-decoration:none}.link:hover{text-decoration:underline}
+.coming{opacity:.75}.tag{display:inline-block;background:#fff4e9;color:#9a440e;font-size:11px;font-weight:800;padding:5px 9px;border-radius:30px;margin-top:5px}
+footer{margin-top:32px;border-top:1px solid var(--line);padding-top:18px;color:var(--muted);font-size:12px}
+@media(max-width:760px){main{margin-top:22px}.cards{grid-template-columns:1fr}.card{min-height:210px}.sectionhead{display:block}.hero{border-radius:20px}header{padding:14px 18px}}
+</style></head>
+<body>
+<header><div class="mark">♟</div><div><div class="brand">TOURNAMENT TOOLKIT</div><div class="sub">Tournament utilities by Kamus Catur</div></div></header>
+<main>
+<section class="hero"><div class="eyebrow">Organizer workspace</div><h1>Less admin. More chess.</h1><p>A growing collection of practical tools to help chess tournament organizers prepare participant data and manage event workflows. Participant files are processed locally in your browser; no player database is used.</p></section>
+<div class="sectionhead"><div><h2>Projects</h2><div class="muted">Choose a tool to get started.</div></div><div class="tag">1 PROJECT AVAILABLE</div></div>
+<section class="cards">
+<article class="card"><div class="cardicon">▦</div><h3>Swiss Manager Project</h3><p>Convert a participant listing into a Swiss Manager-ready Excel workbook with fixed headers, source mapping, automatic field rules and validation.</p><a class="link" href="./swiss-manager/">Open project <span aria-hidden="true">→</span></a></article>
+<article class="card coming"><div class="cardicon">＋</div><h3>Next project</h3><p>This space is reserved for your next tournament utility. New modules can be added without replacing the Swiss Manager converter.</p><span class="muted">Planned</span></article>
+<article class="card coming"><div class="cardicon">♜</div><h3>More tools</h3><p>Tournament Toolkit is designed to grow as you identify more tournament workflows to simplify.</p><span class="muted">Future module</span></article>
+</section>
+<footer>TOURNAMENT TOOLKIT · Version 0.1 · Participant files are handled locally in your browser. Check exports before using them for an official event.</footer>
+</main></body></html>
