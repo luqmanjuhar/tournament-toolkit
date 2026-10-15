@@ -72,7 +72,7 @@ function icInfo(v){const s=String(v??"").replace(/\D/g,"");if(!/^\d{12}$/.test(s
 function source(row,target){const i=state.map[target];return i==null||i<0?"":String(row[i]??"").trim()}
 function renderMapping(){
  const body=$("mapping");body.innerHTML="";
- TARGETS.forEach(t=>{const tr=document.createElement("tr"),td1=document.createElement("td"),td2=document.createElement("td"),td3=document.createElement("td"),sel=document.createElement("select");td1.textContent=t+(t==="Name"?" *":"");makeOptions(sel,state.headers,true);let guess=state.headers.findIndex(h=>(aliases[t]||[t]).map(norm).includes(norm(h)));sel.value=String(guess);state.map[t]=guess;sel.onchange=()=>{state.map[t]=+sel.value;td3.textContent=sample(t)};td2.append(sel);td3.textContent=sample(t);tr.append(td1,td2,td3);body.append(tr)})
+ TARGETS.forEach(t=>{const tr=document.createElement("tr"),td1=document.createElement("td"),td2=document.createElement("td"),td3=document.createElement("td"),sel=document.createElement("select");td1.textContent=t+(t==="Name"?" *":"");makeOptions(sel,state.headers,true);let guess=state.headers.findIndex(h=>(aliases[t]||[t]).map(norm).includes(norm(h)));sel.value=String(guess);state.map[t]=guess;sel.onchange=()=>{state.map[t]=+sel.value;td3.textContent=sample(t);validate()};td2.append(sel);td3.textContent=sample(t);tr.append(td1,td2,td3);body.append(tr)})
 }
 function sample(t){const i=state.map[t];if(i==null||i<0)return "—";const r=state.rows.find(r=>String(r[i]??"").trim());return r?String(r[i]):"—"}
 function readSheet(){
