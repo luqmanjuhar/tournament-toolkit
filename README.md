@@ -13,11 +13,11 @@ Open the Swiss Manager Project at `/swiss-manager/` to convert XLSX, XLS or CSV 
 
 ### 2. Prize Winner List
 
-Open Prize Winner List at `/prize-winner/` to assign winners from two uploaded workbooks.
+Open Prize Winner List at `/prize-winner/` to allocate prizes using a final ranking list and a prize structure.
 
-**Prize structure file:** Include `No`, `Winner`, `Prize` and a required `Type of Winner` column. The value in every prize row must explicitly be `Main Prizes` or `Special Prizes`. The `Winner` column is the award/category title; the tool fills the winning player's name in its result.
+**Prize structure:** The arbiter can either upload an Excel/CSV file or enter prizes manually in the system. The uploaded file should contain `No`, `Winner` (award/category title), `Prize`, and `Type of Winner`. Every prize must explicitly be classified as `Main Prizes` or `Special Prizes`. Manual entry has the same required award title, prize value and type; `No` can be left blank and will be sequenced automatically.
 
-**Final ranking file:** A typical Chess-Results export has `Rk` (ranking), `Name` (player name), `Club/City`, `Typ` (type), and `Gr` (group). The user confirms the field mapping. Club/City, Typ and Gr can each be used as special-prize eligibility filters.
+**Final ranking file:** A typical Chess-Results export has `Rk` (ranking), `Name` (player name), `Club/City`, `Typ` (type), and `Gr` (group). The user confirms the field mapping. Club/City, Typ and Gr can be used as special-prize eligibility filters.
 
 Configurable rules include whether a player can receive multiple prizes, the minimum number of eligible players for a special prize (default 3), and how to resolve a player who qualifies for multiple special prizes (highest numeric prize value or prize-list sequence). Main Prizes are assigned by ranking first. Special Prizes can be filtered by one, two or all three of Club/City, Typ and Gr. The tool produces a reviewable Excel workbook with winner assignments, unawarded prizes and a rule summary, plus CSV exports.
 
