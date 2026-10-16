@@ -101,6 +101,53 @@ function options(sel,headers,firstLabel,firstValue){sel.innerHTML="";if(firstLab
 function autoIndex(headers,aliases){return headers.findIndex(h=>aliases.map(norm).includes(norm(h)))}
 function loadWorkbookInput(inputId,kind){$(inputId).addEventListener("change",async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;if(!window.XLSX){setNotice(kind==="prize"?$("prizeStatus"):$("rankStatus"),"Spreadsheet library did not load. Check internet access and refresh the page.","warn");return}try{const wb=XLSX.read(await f.arrayBuffer(),{type:"array",cellDates:true});if(kind==="prize"){state.prizeWb=wb;state.fileNames.prize=f.name;$("prizeFileName").textContent=f.name;options($("prizeSheet"),wb.SheetNames,null);$("prizeSheet").disabled=false;$("readPrizeHeaders").disabled=false;$("prizeMapping").classList.add("hidden");$("prizePreviewWrap").classList.add("hidden");setNotice($("prizeStatus"),"File loaded. Select the worksheet and header row, then click Read headers.","good")}else{state.rankWb=wb;state.fileNames.rank=f.name;$("rankFileName").textContent=f.name;options($("rankSheet"),wb.SheetNames,null);$("rankSheet").disabled=false;$("readRankHeaders").disabled=false;$("rankMapping").classList.add("hidden");$("rankPreviewWrap").classList.add("hidden");setNotice($("rankStatus"),"File loaded. Select the worksheet and header row, then click Read headers.","good")}}catch(err){setNotice(kind==="prize"?$("prizeStatus"):$("rankStatus"),"Unable to read the file: "+err.message,"warn")}})}
 loadWorkbookInput("prizeFile","prize");loadWorkbookInput("rankFile","rank");
+
+function clearLoadedPrizeResults(){state.prizes=[];state.computed=[];$("settings").classList.add("hidden");$("results").classList.add("hidden")}
+function setupManualPrizeTable(){
+ const table=$("manualPrizeTable");table.innerHTML="";
+ const head=document.createElement("thead"),hr=document.createElement("tr");
+ ["No","Winner / award title","Prize","Type of Winner",""].forEach(label=>{const th=document.createElement("th");th.textContent=label;hr.append(th)});
+ head.append(hr);table.append(head);const body=document.createElement("tbody");table.append(body);
+ for(let i=1;i<=3;i++)appendManualPrizeRow({no:String(i)});
+}
+function appendManualPrizeRow(values={}){
+ const body=$("manualPrizeTable").querySelector("tbody");
+ const tr=document.createElement("tr");
+ function textInput(value,placeholder,klass){const input=document.createElement("input");input.type="text";input.value=value||"";input.placeholder=placeholder;if(klass)input.className=klass;return input}
+ const no=textInput(values.no,"Auto","tiny"),winner=textInput(values.winner,"e.g. Champion"),prize=textInput(values.prize,"e.g. RM500");
+ const type=document.createElement("select");
+ [["","— Choose type —"],["Main Prizes","Main Prizes"],["Special Prizes","Special Prizes"]].forEach(([v,label])=>{const o=document.createElement("option");o.value=v;o.textContent=label;type.append(o)});
+ type.value=values.type||"";
+ const removeCell=document.createElement("td"),remove=document.createElement("button");remove.type="button";remove.className="btn secondary";remove.textContent="Remove";
+ remove.onclick=()=>{tr.remove();if(!$("manualPrizeTable").querySelector("tbody tr"))appendManualPrizeRow({no:"1"});};
+ [no,winner,prize,type].forEach(el=>{const td=document.createElement("td");td.append(el);tr.append(td)});
+ removeCell.append(remove);tr.append(removeCell);body.append(tr);
+}
+function loadManualPrizeStructure(){
+ const rows=Array.from($("manualPrizeTable").querySelectorAll("tbody tr")).map((tr,index)=>{
+ const cells=tr.querySelectorAll("td");
+ return {row:index+1,no:cells[0].querySelector("input").value.trim(),label:cells[1].querySelector("input").value.trim(),prize:cells[2].querySelector("input").value.trim(),typeLabel:cells[3].querySelector("select").value.trim()};
+ }).filter(r=>r.no||r.label||r.prize||r.typeLabel);
+ if(!rows.length){setNotice($("manualPrizeStatus"),"Add at least one prize row before continuing.","warn");return}
+ const bad=rows.filter(r=>!r.label||!r.prize||!parsePrizeType(r.typeLabel));
+ if(bad.length){setNotice($("manualPrizeStatus"),"Complete Winner, Prize and Type of Winner (Main Prizes or Special Prizes) for manual row(s): "+bad.map(r=>r.row).join(", ")+".","warn");return}
+ state.prizes=rows.map((r,i)=>({index:i,no:r.no||String(i+1),label:r.label,prize:r.prize,type:parsePrizeType(r.typeLabel),typeLabel:r.typeLabel,rule1:{col:-1,value:"",match:"exact"},rule2:{col:-1,value:"",match:"exact"},rule3:{col:-1,value:"",match:"exact"},eligibleCount:0,winner:null,status:"",notes:""}));
+ state.fileNames.prize="Manual entry";
+ renderPrizePreview();updateReady();
+ setNotice($("manualPrizeStatus"),"Loaded "+state.prizes.length+" prize row(s) from manual entry. Check the prize types and order before calculating.","good");
+}
+setupManualPrizeTable();
+$("addManualPrizeRow").onclick=()=>appendManualPrizeRow({no:String($("manualPrizeTable").querySelectorAll("tbody tr").length+1)});
+$("loadManualPrizes").onclick=loadManualPrizeStructure;
+document.querySelectorAll('input[name="prizeSource"]').forEach(el=>el.addEventListener("change",()=>{
+ const manual=checked("prizeSource")==="manual";
+ $("prizeExcelSource").classList.toggle("hidden",manual);
+ $("prizeManualSource").classList.toggle("hidden",!manual);
+ clearLoadedPrizeResults();
+ if(manual)setNotice($("manualPrizeStatus"),"Enter the prize rows, then click “Use manual prize structure”.");
+ else setNotice($("prizeStatus"),"Use the uploaded worksheet and column mappings, then click “Load prize rows”.");
+}));
+
 function sheetMatrix(wb,sheet,headerId){const aoa=XLSX.utils.sheet_to_json(wb.Sheets[sheet],{header:1,defval:"",raw:false});const hi=+$(headerId).value;return {headers:(aoa[hi]||[]).map(v=>String(v??"").trim()),rows:aoa.slice(hi+1).filter(r=>r.some(v=>String(v??"").trim()!==""))}}
 $("readPrizeHeaders").onclick=()=>{if(!state.prizeWb)return;const m=sheetMatrix(state.prizeWb,$("prizeSheet").value,"prizeHeaderRow");state.prizeHeaders=m.headers;state.rawPrizeRows=m.rows;options($("prizeNoCol"),m.headers,"— Ignore No —");options($("prizeAwardCol"),m.headers,"— Select Winner / award title —");options($("prizeAmountCol"),m.headers,"— Select Prize —");options($("prizeTypeCol"),m.headers,"— Select Type of Winner —");const no=autoIndex(m.headers,["No","Number","Prize No","Seq","Sequence"]),award=autoIndex(m.headers,["Winner","Award","Category","Prize category","Prize title","Award name","Position"]),amount=autoIndex(m.headers,["Prize","Prize amount","Amount","Value"]),type=autoIndex(m.headers,["Type of Winner","Winner Type","Type Winner","Prize Type","Prize Category Type","Type"]);$("prizeNoCol").value=String(no);$("prizeAwardCol").value=String(award);$("prizeAmountCol").value=String(amount);$("prizeTypeCol").value=String(type);$("prizeMapping").classList.remove("hidden");$("prizePreviewWrap").classList.remove("hidden");setNotice($("prizeStatus"),"Headers loaded. Map No, Winner, Prize, and Type of Winner. The type column is required.","good")};
 function parsePrizeType(value){const v=norm(value);if(["main","main prize","main prizes","overall","overall prize","overall prizes"].includes(v))return "overall";if(["special","special prize","special prizes"].includes(v))return "special";return "";}
