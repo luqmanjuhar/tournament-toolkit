@@ -13,14 +13,15 @@ Open the Swiss Manager Project at `/swiss-manager/` to convert XLSX, XLS or CSV 
 
 ### 2. Prize Winner List
 
-Open Prize Winner List at `/prize-winner/` to assign winners from two uploaded workbooks:
+Open Prize Winner List at `/prize-winner/` to assign winners from two uploaded workbooks.
 
-1. Prize structure (typical columns: `No`, `Winner`, `Prize`). Here the `Winner` column is treated as the award/category title, and the tool fills the actual winning player's name in its output.
-2. Final ranking list, such as a Chess-Results export, with a player name and rank/position column. Keep category/gender/age or other columns if they are needed to define special prizes.
+**Prize structure file:** Include `No`, `Winner`, `Prize` and a required `Type of Winner` column. The value in every prize row must explicitly be `Main Prizes` or `Special Prizes`. The `Winner` column is the award/category title; the tool fills the winning player's name in its result.
 
-Configurable rules include whether one player can receive multiple prizes, the minimum number of eligible players for a special prize, and how to resolve a player who qualifies for multiple special prizes (highest numeric prize value or prize-list sequence). Each special prize must have one or two configured eligibility filters. Overall prizes are assigned in ranking order before special prizes. The tool produces a reviewable Excel workbook with winner assignments, unawarded prizes and rule summary, plus CSV exports.
+**Final ranking file:** A typical Chess-Results export has `Rk` (ranking), `Name` (player name), `Club/City`, `Typ` (type), and `Gr` (group). The user confirms the field mapping. Club/City, Typ and Gr can each be used as special-prize eligibility filters.
 
-**Important:** Prize allocation is a draft. Arbiters should review the eligibility rules and winner list before publishing. If a special prize has fewer eligible players than the configured minimum, it is not awarded.
+Configurable rules include whether a player can receive multiple prizes, the minimum number of eligible players for a special prize (default 3), and how to resolve a player who qualifies for multiple special prizes (highest numeric prize value or prize-list sequence). Main Prizes are assigned by ranking first. Special Prizes can be filtered by one, two or all three of Club/City, Typ and Gr. The tool produces a reviewable Excel workbook with winner assignments, unawarded prizes and a rule summary, plus CSV exports.
+
+**Important:** Prize allocation is a draft. Arbiters should review the eligibility rules and winner list before publishing. Every prize must have an explicit prize type. If a special prize has fewer eligible players than the configured minimum, it is not awarded.
 
 ## Repository layout
 
