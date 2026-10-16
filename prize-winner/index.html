@@ -27,7 +27,7 @@ details{border:1px solid #f4d2bb;background:#fffaf6;border-radius:9px;padding:10
 <main>
 <div class="top"><div><h1>Prize Winner List</h1><p>Build a complete winner list from your prize structure and final tournament ranking.</p></div><span class="tag">PRIZE ALLOCATION</span></div>
 <section class="card">
-<div class="head"><h2>1. Upload the prize structure</h2><span class="muted">Expected headers: No · Winner · Prize · Type of Winner</span></div>
+<div class="head"><h2>1. Set up the prize structure</h2><span class="muted">Upload a file or enter prizes manually</span></div>
 <details open><summary>What should the prize structure contain?</summary><ul><li>One row per award or prize, such as Champion, Runner-up, Best U12, or Best Girl.</li><li><b>Winner</b> is the award title/category; the tool fills the actual player name in the result.</li><li>Add a <b>Type of Winner</b> column with an explicit value on every row: <b>Main Prizes</b> or <b>Special Prizes</b>. The tool will not guess the prize type from its name.</li><li>Special-prize eligibility is configured using <b>Club/City</b>, <b>Typ</b> and/or <b>Gr</b> from the final ranking file.</li><li>Prize can contain cash, an item, medal, trophy or a combination. Numeric amounts help compare prize values.</li></ul></details>
 <div style="display:flex;gap:18px;flex-wrap:wrap;margin:0 0 15px">
 <label class="checkrow"><input type="radio" name="prizeSource" value="excel" checked> Upload Excel / CSV</label>
@@ -108,7 +108,7 @@ function setupManualPrizeTable(){
  const head=document.createElement("thead"),hr=document.createElement("tr");
  ["No","Winner / award title","Prize","Type of Winner",""].forEach(label=>{const th=document.createElement("th");th.textContent=label;hr.append(th)});
  head.append(hr);table.append(head);const body=document.createElement("tbody");table.append(body);
- for(let i=1;i<=3;i++)appendManualPrizeRow({no:String(i)});
+ for(let i=1;i<=3;i++)appendManualPrizeRow({});
 }
 function appendManualPrizeRow(values={}){
  const body=$("manualPrizeTable").querySelector("tbody");
@@ -137,7 +137,7 @@ function loadManualPrizeStructure(){
  setNotice($("manualPrizeStatus"),"Loaded "+state.prizes.length+" prize row(s) from manual entry. Check the prize types and order before calculating.","good");
 }
 setupManualPrizeTable();
-$("addManualPrizeRow").onclick=()=>appendManualPrizeRow({no:String($("manualPrizeTable").querySelectorAll("tbody tr").length+1)});
+$("addManualPrizeRow").onclick=()=>appendManualPrizeRow({});
 $("loadManualPrizes").onclick=loadManualPrizeStructure;
 document.querySelectorAll('input[name="prizeSource"]').forEach(el=>el.addEventListener("change",()=>{
  const manual=checked("prizeSource")==="manual";
