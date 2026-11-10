@@ -113,6 +113,11 @@
   .place input { max-width: 150px; font-family: var(--font-data); }
   .empty { text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 10px; padding: 16px; margin-top: 12px; }
   .exclude { margin-top: 16px; max-width: 360px; }
+  .drag { cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; font-size: 1.05rem; line-height: 1; }
+  .prize.dragging { opacity: 0.55; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2); }
+  .prize.drop-before { box-shadow: 0 -4px 0 var(--board); }
+  .prize.drop-after { box-shadow: 0 4px 0 var(--board); }
+  body.dragging-prize, body.dragging-prize * { cursor: grabbing !important; user-select: none; }
   .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
   .info-grid .wide { grid-column: 1 / -1; }
   .req { color: var(--bad); }
@@ -278,7 +283,7 @@
         <button type="button" id="add-special">+ Special Prize</button>
         <button type="button" id="btn-template" class="ghost">Sample template</button>
       </div>
-      <p class="hint">The order of this list decides priority (see Prize priority above). Use the arrows to change the order.</p>
+      <p class="hint">The order of this list decides priority (see Prize priority above). Drag the ⠿ handle to reorder a prize, or use the arrows.</p>
       <div id="prizes"></div>
       <p class="empty" id="prizes-empty" hidden>No prizes yet. Add a prize or use the sample template.</p>
       <div class="exclude">
@@ -499,6 +504,7 @@ function prizeCard(p, i) {
         <option value="special"${p.type === 'special' ? ' selected' : ''}>Special Prize</option>
       </select>
       <div class="btns">
+        <button type="button" class="icon ghost drag" data-drag aria-label="Drag to reorder this prize" title="Drag to reorder">⠿</button>
         <button type="button" class="icon ghost" data-act="up" aria-label="Move up (higher priority)"${i === 0 ? ' disabled' : ''}>↑</button>
         <button type="button" class="icon ghost" data-act="down" aria-label="Move down (lower priority)"${i === state.prizes.length - 1 ? ' disabled' : ''}>↓</button>
         <button type="button" class="ghost" data-act="toggle" aria-expanded="${p.open ? 'true' : 'false'}">${p.open ? 'Close' : 'Edit'}</button>
@@ -730,6 +736,53 @@ function renderAll() {
 $('#prizes').addEventListener('input', onPrizeInput);
 $('#prizes').addEventListener('change', onPrizeInput);
 $('#prizes').addEventListener('click', onPrizeClick);
+
+/* ---------- drag and drop to reorder prizes (mouse, touch and pen) ---------- */
+let drag = null;
+function clearDropMarks() {
+  for (const el of document.querySelectorAll('#prizes .drop-before, #prizes .drop-after')) el.classList.remove('drop-before', 'drop-after');
+}
+function endDrag(commit) {
+  if (!drag) return;
+  const { from, to, card } = drag;
+  card.classList.remove('dragging');
+  document.body.classList.remove('dragging-prize');
+  clearDropMarks();
+  drag = null;
+  if (commit && to !== from) {
+    const [moved] = state.prizes.splice(from, 1);
+    state.prizes.splice(to, 0, moved);
+    renderPrizes();
+    refresh();
+  }
+}
+$('#prizes').addEventListener('pointerdown', (e) => {
+  const handle = e.target.closest('[data-drag]');
+  if (!handle || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  const card = handle.closest('[data-p]');
+  e.preventDefault();
+  handle.setPointerCapture(e.pointerId);
+  drag = { from: Number(card.dataset.p), to: Number(card.dataset.p), card, id: e.pointerId };
+  card.classList.add('dragging');
+  document.body.classList.add('dragging-prize');
+});
+$('#prizes').addEventListener('pointermove', (e) => {
+  if (!drag || e.pointerId !== drag.id) return;
+  if (e.clientY < 70) window.scrollBy(0, -14);
+  else if (e.clientY > window.innerHeight - 70) window.scrollBy(0, 14);
+  const cards = [...document.querySelectorAll('#prizes [data-p]')];
+  let to = cards.length - 1;
+  for (const c of cards) {
+    const r = c.getBoundingClientRect();
+    if (e.clientY < r.top + r.height / 2) { to = Number(c.dataset.p); break; }
+  }
+  drag.to = to;
+  clearDropMarks();
+  if (to !== drag.from) cards[to].classList.add(to < drag.from ? 'drop-before' : 'drop-after');
+});
+$('#prizes').addEventListener('pointerup', (e) => { if (drag && e.pointerId === drag.id) endDrag(true); });
+$('#prizes').addEventListener('pointercancel', () => endDrag(false));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') endDrag(false); });
 
 for (const r of document.querySelectorAll('input[name="mode"]')) {
   r.addEventListener('change', () => {
