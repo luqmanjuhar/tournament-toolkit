@@ -68,7 +68,7 @@
   button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
     outline: 2px solid var(--accent); outline-offset: 2px;
   }
-  input[type="text"], input[type="number"], select, textarea {
+  input[type="text"], input[type="number"], input[type="date"], select, textarea {
     width: 100%; font: inherit; color: var(--ink); background: var(--surface);
     border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; min-width: 0;
   }
@@ -113,6 +113,11 @@
   .place input { max-width: 150px; font-family: var(--font-data); }
   .empty { text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 10px; padding: 16px; margin-top: 12px; }
   .exclude { margin-top: 16px; max-width: 360px; }
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .info-grid .wide { grid-column: 1 / -1; }
+  .req { color: var(--bad); }
+  .gate { margin: 10px 0 0; font-size: 0.88rem; color: var(--warn); background: var(--warn-soft); border-radius: 8px; padding: 8px 12px; }
+  .gate:empty { display: none; }
 
   .badge { font: 500 0.72rem var(--font-body); padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); }
   .badge.main { background: var(--prize-soft); color: var(--prize); }
@@ -171,8 +176,23 @@
 
   <section id="panel-data" role="tabpanel" aria-labelledby="tab-data">
     <div class="panel">
-      <h2>Tournament data</h2>
-      <p class="data-title" id="data-title"></p>
+      <h2>1. Tournament details</h2>
+      <div class="info-grid">
+        <div class="wide"><label class="lbl" for="info-name">Tournament name <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" id="info-name" data-info="name" autocomplete="off" placeholder="e.g. Johor Junior Chess Championship 2026" required></div>
+        <div><label class="lbl" for="info-date">Date <span class="req" aria-hidden="true">*</span></label>
+          <input type="date" id="info-date" data-info="date" required></div>
+        <div><label class="lbl" for="info-venue">Venue <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" id="info-venue" data-info="venue" autocomplete="off" placeholder="e.g. Dewan Serbaguna, Johor Bahru" required></div>
+        <div class="wide"><label class="lbl" for="info-organizer">Organizer (optional)</label>
+          <input type="text" id="info-organizer" data-info="organizer" autocomplete="off" placeholder="e.g. Kamus Catur"></div>
+      </div>
+      <p class="hint">These details appear on the winner list, the Excel summary and the printed PDF.</p>
+    </div>
+
+    <div class="panel">
+      <h2>2. Final ranking list</h2>
+      <p class="gate" id="info-gate" role="status"></p>
       <p class="hint" id="data-sub"></p>
       <div class="chips" id="chips" aria-label="Detected columns"></div>
       <div id="data-warn"></div>
@@ -819,7 +839,29 @@ const FIELD_LABELS = {
 const OPTIONAL_FIELDS = ['sex', 'group', 'club', 'type', 'fed', 'rating'];
 const MAX_CHIPS = 12;
 
-const state = { data: null, mode: 'single', prizes: [], excludedText: '' };
+const state = { data: null, mode: 'single', prizes: [], excludedText: '', info: { name: '', date: '', venue: '', organizer: '' } };
+
+/* ---------- tournament details (required before loading a ranking list) ---------- */
+const infoComplete = () => ['name', 'date', 'venue'].every((k) => state.info[k].trim());
+const tournamentName = () => state.info.name.trim() || (state.data && state.data.title) || 'Tournament';
+function fmtDate(v) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || '');
+  if (!m) return v || '';
+  return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+function infoLine() {
+  const i = state.info;
+  return [fmtDate(i.date), i.venue.trim(), i.organizer.trim() && `Organised by ${i.organizer.trim()}`].filter(Boolean).join(' · ');
+}
+function syncInfoInputs() {
+  for (const el of document.querySelectorAll('[data-info]')) el.value = state.info[el.dataset.info];
+}
+function updateGate() {
+  const ok = infoComplete();
+  for (const id of ['#btn-upload', '#btn-paste-toggle', '#btn-use-paste']) $(id).disabled = !ok;
+  $('#info-gate').textContent = ok ? '' : 'Fill in the tournament name, date and venue above to unlock the ranking list upload.';
+}
+
 
 /* ---------- sample data (real structure, made-up names and clubs) ---------- */
 // [Rk, SNo, sex, Gr, RtgI, Pts]
@@ -853,7 +895,10 @@ function sampleText() {
 }
 
 function loadSample() {
-  state.data = { ...parseRankingText(sampleText()), title: 'Sample U12 Tournament', listTitle: 'Final Ranking after 6 Rounds', isSample: true };
+  state.info = { name: 'Sample U12 Tournament', date: '2026-03-14', venue: 'Sample Hall, Kuala Lumpur', organizer: 'Kamus Catur' };
+  syncInfoInputs();
+  updateGate();
+  state.data = { ...parseRankingText(sampleText()), title: state.info.name, listTitle: 'Final Ranking after 6 Rounds', isSample: true };
   const prizes = templatePrizes(state.data);
   const club = newPrize('special', 'Best Kelab Catur Bangsar');
   club.filter.club = ['Kelab Catur Bangsar'];
@@ -872,7 +917,14 @@ function setMsg(text, kind = '') {
 
 function renderData() {
   const d = state.data;
-  $('#data-title').textContent = d.title || 'Tournament';
+  if (!d) {
+    $('#data-sub').textContent = 'No ranking list loaded yet.';
+    $('#chips').innerHTML = '';
+    $('#data-warn').innerHTML = '';
+    $('#players-table').innerHTML = '';
+    for (const id of ['#count-data', '#count-prizes', '#count-winners']) $(id).textContent = '';
+    return;
+  }
   $('#data-sub').textContent = `${d.listTitle ? d.listTitle + ' · ' : ''}${d.players.length} players${d.isSample ? ' · sample data, made-up names' : ''}`;
   const detected = d.columns.filter((c) => c.field);
   const missing = OPTIONAL_FIELDS.filter((f) => !d.fields[f]);
@@ -1016,6 +1068,7 @@ function updateCounts(res) {
 
 function renderResult() {
   const d = state.data;
+  if (!d) { $('#result').innerHTML = ''; return; }
   const res = allocate(d.players, toAllocatorConfig(state), d.fields);
   lastResult = res;
   updateCounts(res);
@@ -1069,8 +1122,9 @@ function renderResult() {
   }
 
   box.innerHTML = `
-    <div class="res-meta"><strong>${esc(d.title || 'Tournament')}</strong>
+    <div class="res-meta"><strong>${esc(tournamentName())}</strong>
       <span>${res.mode === 'single' ? 'One prize per player' : 'Players can win more than one'}</span></div>
+    <p class="hint">${esc(infoLine())}</p>
     ${list(res.warnings, 'warn')}<div class="res-grid">${blocks}</div>
     <div class="total"><span>Total prizes · ${winnerCount} winners</span><span class="num">${money(res.totalAmount)}</span></div>
     ${log}
@@ -1160,7 +1214,10 @@ function onPrizeClick(e) {
 }
 
 function renderAll() {
+  const has = !!state.data;
+  for (const el of document.querySelectorAll('[data-tab="prizes"], [data-tab="winners"], [data-go="prizes"], [data-go="winners"]')) el.disabled = !has;
   renderData();
+  if (!has) { refresh(); return; }
   renderPrizes();
   refresh();
 }
@@ -1171,6 +1228,14 @@ $('#prizes').addEventListener('click', onPrizeClick);
 
 for (const r of document.querySelectorAll('input[name="mode"]')) {
   r.addEventListener('change', () => { state.mode = r.value; refresh(); });
+}
+for (const el of document.querySelectorAll('[data-info]')) {
+  el.addEventListener('input', () => {
+    state.info[el.dataset.info] = el.value;
+    if (state.data) state.data.title = tournamentName();
+    updateGate();
+    if (state.data) renderResult();
+  });
 }
 $('#excluded').addEventListener('input', (e) => { state.excludedText = e.target.value; refresh(); });
 function addPrize(type) {
@@ -1193,7 +1258,7 @@ $('#btn-paste-toggle').addEventListener('click', (e) => {
 });
 /* ---------- file upload (XLSX / XLS / CSV) ---------- */
 function loadParsed(parsed, fallbackTitle) {
-  state.data = { ...parsed, title: parsed.title || fallbackTitle, listTitle: parsed.listTitle || '' };
+  state.data = { ...parsed, title: state.info.name.trim() || fallbackTitle, listTitle: parsed.listTitle || '' };
   state.prizes = templatePrizes(state.data);
   state.mode = 'single';
   state.excludedText = '';
@@ -1206,6 +1271,7 @@ $('#file-input').addEventListener('change', async (e) => {
   const f = e.target.files && e.target.files[0];
   e.target.value = '';
   if (!f) return;
+  if (!infoComplete()) return setMsg('Fill in the tournament details first.', 'error');
   if (!window.XLSX) return setMsg('Spreadsheet library did not load. Check your internet connection and refresh.', 'error');
   try {
     const wb = XLSX.read(await f.arrayBuffer(), { type: 'array' });
@@ -1225,10 +1291,11 @@ $('#file-input').addEventListener('change', async (e) => {
 $('#btn-sample').addEventListener('click', () => { loadSample(); setMsg('Sample data loaded.', 'ok'); renderAll(); });
 $('#btn-use-paste').addEventListener('click', () => {
   const text = $('#paste-text').value;
+  if (!infoComplete()) return setMsg('Fill in the tournament details first.', 'error');
   if (!text.trim()) return setMsg('Paste the ranking table first.', 'error');
   try {
     const parsed = parseRankingText(text);
-    state.data = { ...parsed, title: parsed.title || 'Your tournament', listTitle: parsed.listTitle || '' };
+    state.data = { ...parsed, title: state.info.name.trim(), listTitle: parsed.listTitle || '' };
     state.prizes = templatePrizes(state.data);
     state.mode = 'single';
     state.excludedText = '';
@@ -1260,7 +1327,10 @@ function downloadXlsx() {
   ws['!cols'] = [26, 12, 7, 11, 6, 6, 32, 8, 28, 8, 7, 8].map((wch) => ({ wch }));
   const winners = new Set(lastResult.awards.filter((a) => a.player).map((a) => a.player.snr)).size;
   const summary = XLSX.utils.aoa_to_sheet([
-    ['Tournament', state.data.title || ''],
+    ['Tournament', tournamentName()],
+    ['Date', fmtDate(state.info.date)],
+    ['Venue', state.info.venue.trim()],
+    ['Organizer', state.info.organizer.trim()],
     ['Mode', lastResult.mode === 'single' ? 'One prize per player' : 'Players can win more than one'],
     ['Winners', winners],
     ['Total prizes (RM)', lastResult.totalAmount],
@@ -1283,7 +1353,7 @@ $('#result').addEventListener('click', (e) => {
 const TABS = ['data', 'prizes', 'winners'];
 
 function showTab(name) {
-  const current = TABS.includes(name) ? name : 'data';
+  const current = TABS.includes(name) && (state.data || name === 'data') ? name : 'data';
   for (const t of TABS) {
     const on = t === current;
     const tab = $(`#tab-${t}`);
@@ -1324,7 +1394,8 @@ if (typeof window !== 'undefined') {
   window.addEventListener('hashchange', () => showTab(location.hash.slice(1)));
 }
 
-loadSample();
+syncInfoInputs();
+updateGate();
 renderAll();
 showTab(typeof location !== 'undefined' ? location.hash.slice(1) : 'data');
 
