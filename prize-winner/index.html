@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="../theme.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   /* Layout: one column with three tabs in working order: Data, Prizes, Winners. */
   /* Palette comes from ../theme.css (Kamus Catur); these aliases keep the page rules readable. */
@@ -137,6 +138,15 @@
     .res-grid { grid-template-columns: minmax(0, 1fr); }
     .tabbar button { padding-inline: 6px; gap: 5px; font-size: 0.88rem; }
   }
+  @media print {
+    body { background: #fff; color: #000; }
+    .site-header, .tabbar, .nav-row, .btn-row, #panel-data, #panel-prizes, .site-footer, #copy-fallback, .msg { display: none !important; }
+    #panel-winners { display: block !important; }
+    .panel { border: 0; padding: 0; }
+    .scroll { max-height: none; overflow: visible; }
+    .res-grid > div, tr { break-inside: avoid; }
+    :root { --bg: #fff; --surface: #fff; --surface-2: #f4f4f4; --fg: #000; --ink: #000; --muted: #444; --line: #bbb; }
+  }
   @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 </style>
 
@@ -167,6 +177,8 @@
       <div class="chips" id="chips" aria-label="Detected columns"></div>
       <div id="data-warn"></div>
       <div class="btn-row">
+        <input type="file" id="file-input" accept=".xlsx,.xls,.csv" hidden>
+        <button type="button" id="btn-upload" class="primary">Upload Excel / CSV file</button>
         <button type="button" id="btn-paste-toggle" aria-expanded="false" aria-controls="paste-box">Paste your own table</button>
         <button type="button" id="btn-sample">Use sample data</button>
       </div>
@@ -176,7 +188,7 @@
         <button type="button" id="btn-use-paste" class="primary">Use this table</button>
       </div>
       <p class="msg" id="data-msg" role="status" aria-live="polite"></p>
-      <p class="hint">Copy the Final Ranking table from Chess-Results and paste it here. All data is processed in your browser.</p>
+      <p class="hint">Upload the Final Ranking exported from Chess-Results (XLSX, XLS or CSV), or copy the table and paste it here. All data is processed in your browser.</p>
       <details>
         <summary>Review player data</summary>
         <div class="scroll"><table id="players-table"></table></div>
@@ -1062,8 +1074,8 @@ function renderResult() {
     ${list(res.warnings, 'warn')}<div class="res-grid">${blocks}</div>
     <div class="total"><span>Total prizes · ${winnerCount} winners</span><span class="num">${money(res.totalAmount)}</span></div>
     ${log}
-    <div class="btn-row"><button type="button" id="btn-copy" class="primary">Copy results</button><button type="button" id="btn-csv">Download CSV</button></div>
-    <p class="hint">Use Copy results to paste straight into Excel, or download the CSV.</p>
+    <div class="btn-row"><button type="button" id="btn-copy" class="primary">Copy results</button><button type="button" id="btn-xlsx">Download Excel</button><button type="button" id="btn-csv">Download CSV</button><button type="button" id="btn-pdf">Print / Save as PDF</button></div>
+    <p class="hint">Copy results to paste into Excel, download Excel or CSV, or use Print / Save as PDF for a printable winner list.</p>
     <p class="msg" id="copy-msg" role="status" aria-live="polite"></p>
     <textarea id="copy-fallback" rows="5" readonly hidden aria-label="Results to copy"></textarea>`;
 }
@@ -1179,13 +1191,44 @@ $('#btn-paste-toggle').addEventListener('click', (e) => {
   e.currentTarget.setAttribute('aria-expanded', String(!box.hidden));
   if (!box.hidden) $('#paste-text').focus();
 });
+/* ---------- file upload (XLSX / XLS / CSV) ---------- */
+function loadParsed(parsed, fallbackTitle) {
+  state.data = { ...parsed, title: parsed.title || fallbackTitle, listTitle: parsed.listTitle || '' };
+  state.prizes = templatePrizes(state.data);
+  state.mode = 'single';
+  state.excludedText = '';
+  setMsg(`${parsed.players.length} players loaded. A sample prize template is in use; please adjust the values.`, 'ok');
+  renderAll();
+}
+
+$('#btn-upload').addEventListener('click', () => $('#file-input').click());
+$('#file-input').addEventListener('change', async (e) => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  if (!window.XLSX) return setMsg('Spreadsheet library did not load. Check your internet connection and refresh.', 'error');
+  try {
+    const wb = XLSX.read(await f.arrayBuffer(), { type: 'array' });
+    let parsed = null, lastErr = null;
+    for (const name of wb.SheetNames) {
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, defval: '', raw: false })
+        .map((r) => r.map((v) => String(v ?? '').trim()));
+      try { parsed = parseRows(rows); break; } catch (err) { lastErr = err; }
+    }
+    if (!parsed) throw lastErr || new ImportError('No ranking table found in this file.');
+    loadParsed({ title: '', listTitle: '', ...parsed }, f.name.replace(/\.[^.]+$/, ''));
+  } catch (err) {
+    setMsg(err.message || 'The file could not be read.', 'error');
+  }
+});
+
 $('#btn-sample').addEventListener('click', () => { loadSample(); setMsg('Sample data loaded.', 'ok'); renderAll(); });
 $('#btn-use-paste').addEventListener('click', () => {
   const text = $('#paste-text').value;
   if (!text.trim()) return setMsg('Paste the ranking table first.', 'error');
   try {
     const parsed = parseRankingText(text);
-    state.data = { title: parsed.title || 'Your tournament', listTitle: parsed.listTitle || '', ...parsed };
+    state.data = { ...parsed, title: parsed.title || 'Your tournament', listTitle: parsed.listTitle || '' };
     state.prizes = templatePrizes(state.data);
     state.mode = 'single';
     state.excludedText = '';
@@ -1204,9 +1247,36 @@ function downloadCsv() {
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(u), 1000);
 }
+function downloadXlsx() {
+  if (!lastResult || !lastResult.ok) return;
+  if (!window.XLSX) { $('#copy-msg').textContent = 'Excel library did not load. Check your internet connection and refresh.'; return; }
+  const header = ['Prize', 'Prize type', 'Place', 'Value (RM)', 'Rk.', 'SNo', 'Name', 'Gr', 'Club/City', 'Type', 'FED', 'Points'];
+  const rows = lastResult.awards.map((a) => {
+    const p = a.player;
+    return [a.prizeName, a.type === 'main' ? 'Main' : 'Special', a.place, a.amount,
+      p ? p.rank : '', p ? p.snr : '', p ? p.name : '(no winner)', p ? p.group : '', p ? p.club : '', p ? p.type : '', p ? p.fed : '', p && p.points != null ? p.points : ''];
+  });
+  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+  ws['!cols'] = [26, 12, 7, 11, 6, 6, 32, 8, 28, 8, 7, 8].map((wch) => ({ wch }));
+  const winners = new Set(lastResult.awards.filter((a) => a.player).map((a) => a.player.snr)).size;
+  const summary = XLSX.utils.aoa_to_sheet([
+    ['Tournament', state.data.title || ''],
+    ['Mode', lastResult.mode === 'single' ? 'One prize per player' : 'Players can win more than one'],
+    ['Winners', winners],
+    ['Total prizes (RM)', lastResult.totalAmount],
+  ]);
+  summary['!cols'] = [{ wch: 20 }, { wch: 40 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Winners');
+  XLSX.utils.book_append_sheet(wb, summary, 'Summary');
+  XLSX.writeFile(wb, 'prize_winners.xlsx');
+}
+
 $('#result').addEventListener('click', (e) => {
   if (e.target.id === 'btn-copy') copyResults();
   else if (e.target.id === 'btn-csv') downloadCsv();
+  else if (e.target.id === 'btn-xlsx') downloadXlsx();
+  else if (e.target.id === 'btn-pdf') window.print();
 });
 
 /* ---------- tabs ---------- */
