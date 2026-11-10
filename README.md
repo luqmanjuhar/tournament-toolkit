@@ -17,10 +17,18 @@ Open Prize Winner List at `/prize-winner/` to find Main and Special prize winner
 
 - **Data:** first fill in the tournament details (name, date and venue are required; organizer is optional). The ranking list upload stays locked until they are filled, and the Prizes and Winners tabs unlock once a ranking list is loaded. The details appear on the winner list, the Excel summary and the printed PDF. Then upload the Final Ranking exported from Chess-Results (XLSX, XLS or CSV; the ranking sheet and header row are found automatically) or paste the table copied from Chess-Results. Columns (`Rk.`, `SNo`, `Name`, `sex`, `Gr`, `FED`, `Club/City`, `Typ`, `RtgI`, `Pts.`) are detected from the headers. Sample data is available.
 - **Prizes:** build the prize list. Each prize is Main or Special, with one or more places, each with an RM value. Special prizes can combine filters: Gr, sex, Club/City, Typ, FED, rated/unrated, rating range and rank range. Prizes can be reordered, and withdrawn players can be excluded by SNo.
-- **Winner rule:** either one prize per player (the highest value wins; a released prize drops to the next eligible player) or several prizes per player.
+- **Winner rule:** either one prize per player (a released prize drops to the next eligible player) or several prizes per player. In one-prize mode, **Prize priority** is either *list order* (default: slots are filled in prize-list order, then place, so put Main prizes at the top) or *highest value first* (equal values follow list order). By default RM0 prizes (medal or trophy only) also count as a prize; untick that option to let a player take several medals, or a medal plus a cash prize. One player never takes two places in the same prize.
 - **Winners:** shows winners per prize, the total, and a log of players eligible for more than one prize. Results can be copied for Excel, downloaded as Excel (.xlsx) or CSV, or printed / saved as PDF through the browser's print dialog.
 
 **Important:** Prize allocation is a draft. Review the rules and winner list before publishing.
+
+## Tests
+
+The allocation engine lives in `prize-winner/engine.js` and is covered by unit tests that need no dependencies (Node 18+):
+
+```bash
+node --test tests/prize-engine.test.js
+```
 
 ## Repository layout
 
@@ -28,7 +36,9 @@ Open Prize Winner List at `/prize-winner/` to find Main and Special prize winner
 /
 ├── index.html                  # Toolkit dashboard
 ├── swiss-manager/index.html    # Swiss Manager converter
-├── prize-winner/index.html     # Prize Winner List
+├── prize-winner/index.html     # Prize Winner List (UI)
+├── prize-winner/engine.js      # Prize allocation engine (tested)
+├── tests/                      # Unit tests
 └── README.md
 ```
 
