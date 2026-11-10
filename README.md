@@ -11,17 +11,16 @@ Open the Swiss Manager Project at `/swiss-manager/` to convert XLSX, XLS or CSV 
 - Exact target headers and order are preserved, including the leading space in ` Fed`.
 - Supports source-column mapping, registration-date-based IDs, optional IC-derived birth/sex, category/federation rules, validation preview and XLSX export.
 
-### 2. Prize Winner List
+### 2. Prize Winner List (Prize Structure)
 
-Open Prize Winner List at `/prize-winner/` to allocate prizes using a final ranking list and a prize structure.
+Open Prize Winner List at `/prize-winner/` to find Main and Special prize winners from a Chess-Results Final Ranking. The interface is in Bahasa Malaysia and has three tabs: **Data**, **Hadiah**, **Pemenang**.
 
-**Prize structure:** The arbiter can either upload an Excel/CSV file or enter prizes manually in the system. The uploaded file should contain `No`, `Winner` (award/category title), `Prize`, and `Type of Winner`. Every prize must explicitly be classified as `Main Prizes` or `Special Prizes`. Manual entry has the same required award title, prize value and type; `No` can be left blank and will be sequenced automatically.
+- **Data:** paste the Final Ranking table copied from Chess-Results (or its HTML). Columns (`Rk.`, `SNo`, `Name`, `sex`, `Gr`, `FED`, `Club/City`, `Typ`, `RtgI`, `Pts.`) are detected from the headers. Sample data is available.
+- **Hadiah:** build the prize list. Each prize is Main or Special, with one or more places, each with an RM value. Special prizes can combine filters: Gr, sex, Club/City, Typ, FED, rated/unrated, rating range and rank range. Prizes can be reordered, and withdrawn players can be excluded by SNo.
+- **Winner rule:** either one prize per player (the highest value wins; a released prize drops to the next eligible player) or several prizes per player.
+- **Pemenang:** shows winners per prize, the total, and a log of players eligible for more than one prize. Results can be copied for Excel or downloaded as CSV.
 
-**Final ranking file:** A typical Chess-Results export has `Rk` (ranking), `Name` (player name), `Club/City`, `Typ` (type), and `Gr` (group). The user confirms the field mapping. The tool supports special-prize eligibility based on one selected parameter: Type (`Typ`), Group (`Gr`), or Club/City.
-
-For every `Special Prizes` row, the arbiter must select one eligibility parameter and enter the matching value. A special prize without a valid parameter and value is marked `RULE REQUIRED` and is not assigned to a player. Main Prizes are assigned by overall ranking first; Special Prizes are allocated afterward, in prize-list sequence, to the highest-ranked eligible player who has not already received a prize unless multiple prizes are allowed. The final results and exports follow the prize structure order (`No`, or row order when `No` is not provided) and include the eligibility rule used for each special prize. The tool produces a reviewable Excel workbook with winner assignments, unawarded prizes and a rule summary, plus CSV exports.
-
-**Important:** Prize allocation is a draft. Arbiters should review the eligibility rules and winner list before publishing. Every prize must have an explicit prize type. If a special prize has fewer eligible players than the configured minimum, it is not awarded.
+**Important:** Prize allocation is a draft. Review the rules and winner list before publishing.
 
 ## Repository layout
 
@@ -39,4 +38,4 @@ Import this GitHub repository into Vercel. For this static HTML app, choose **Ot
 
 ## Privacy
 
-There is no app database or application backend. Uploaded sheets are parsed and processed in the browser and are not intentionally uploaded to a server. Spreadsheet support loads SheetJS from jsDelivr, so an internet connection is required. Use a trusted device for sensitive participant lists and review exports before an official event.
+There is no app database or application backend. Uploaded sheets are parsed and processed in the browser and are not intentionally uploaded to a server. Swiss Manager spreadsheet support loads SheetJS from jsDelivr, so an internet connection is required. Use a trusted device for sensitive participant lists and review exports before an official event.
