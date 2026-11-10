@@ -224,3 +224,30 @@ test('fill with medalExclusive false: medals do not block each other', () => {
 test('toAllocatorConfig keeps the fill priority', () => {
   assert.equal(E.toAllocatorConfig({ mode: 'single', prizes: [], excludedText: '', priority: 'fill' }).priority, 'fill');
 });
+
+// ---- fill: equal cash amounts behave like RM0 ----------------------------
+const cashU18 = (amt) => prize('Best U18', 'special', { type: ['U18'] }, [amt, amt]);
+const cashK = (amt) => prize('Best KChers', 'special', { club: ['KCHERS'] }, [amt, amt]);
+
+test('fill: equal cash amounts (RM10 each) are ordered by scarcity, not list order', () => {
+  for (const order of [[cashU18(10), cashK(10)], [cashK(10), cashU18(10)]]) {
+    const res = run(realCase(), [cash5, ...order], { priority: 'fill' });
+    assert.deepEqual(winnersOf(res, 'Best KChers'), [6, 9]);
+    assert.deepEqual(winnersOf(res, 'Best U18'), [7, 11]);
+    assert.equal(res.totalAmount, 340 + 40);
+  }
+});
+
+test('fill: different cash amounts still go highest value first', () => {
+  const res = run(realCase(), [cash5, cashK(10), cashU18(20)], { priority: 'fill' });
+  assert.deepEqual(winnersOf(res, 'Best U18'), [6, 7]); // RM20 tier is filled before RM10
+  assert.deepEqual(winnersOf(res, 'Best KChers'), [9, null]);
+});
+
+test('fill: on an exact value tie a Main prize goes before a Special prize', () => {
+  const main = prize('Main 3rd', 'main', {}, [30]);
+  const special = prize('Special', 'special', { type: ['U18'] }, [30]);
+  const res = run(realCase(), [special, main], { priority: 'fill' });
+  assert.equal(winnersOf(res, 'Main 3rd')[0], 1);
+  assert.equal(winnersOf(res, 'Special')[0], 3);
+});
