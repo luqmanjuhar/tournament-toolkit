@@ -13,12 +13,12 @@ Open the Swiss Manager Project at `/swiss-manager/` to convert XLSX, XLS or CSV 
 
 ### 2. Prize Winner List (Prize Structure)
 
-Open Prize Winner List at `/prize-winner/` to find Main and Special prize winners from a Chess-Results Final Ranking. The interface is in Bahasa Malaysia and has three tabs: **Data**, **Hadiah**, **Pemenang**.
+Open Prize Winner List at `/prize-winner/` to find Main and Special prize winners from a Chess-Results Final Ranking. The interface is in English and has three tabs: **Data**, **Prizes**, **Winners**.
 
 - **Data:** paste the Final Ranking table copied from Chess-Results (or its HTML). Columns (`Rk.`, `SNo`, `Name`, `sex`, `Gr`, `FED`, `Club/City`, `Typ`, `RtgI`, `Pts.`) are detected from the headers. Sample data is available.
-- **Hadiah:** build the prize list. Each prize is Main or Special, with one or more places, each with an RM value. Special prizes can combine filters: Gr, sex, Club/City, Typ, FED, rated/unrated, rating range and rank range. Prizes can be reordered, and withdrawn players can be excluded by SNo.
+- **Prizes:** build the prize list. Each prize is Main or Special, with one or more places, each with an RM value. Special prizes can combine filters: Gr, sex, Club/City, Typ, FED, rated/unrated, rating range and rank range. Prizes can be reordered, and withdrawn players can be excluded by SNo.
 - **Winner rule:** either one prize per player (the highest value wins; a released prize drops to the next eligible player) or several prizes per player.
-- **Pemenang:** shows winners per prize, the total, and a log of players eligible for more than one prize. Results can be copied for Excel or downloaded as CSV.
+- **Winners:** shows winners per prize, the total, and a log of players eligible for more than one prize. Results can be copied for Excel or downloaded as CSV.
 
 **Important:** Prize allocation is a draft. Review the rules and winner list before publishing.
 

@@ -1,15 +1,15 @@
 <!doctype html>
-<html lang="ms">
+<html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Prize Structure · Tournament Toolkit</title>
-<meta name="description" content="Cari pemenang Main Prize dan Special Prize daripada Final Ranking Chess-Results.">
+<meta name="description" content="Find Main Prize and Special Prize winners from a Chess-Results Final Ranking.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="../theme.css">
 <style>
-  /* Susun atur: satu lajur dengan tiga tab mengikut urutan kerja: Data, Hadiah, Pemenang. */
+  /* Layout: one column with three tabs in working order: Data, Prizes, Winners. */
   /* Palette comes from ../theme.css (Kamus Catur); these aliases keep the page rules readable. */
   :root {
     --ink: var(--fg);
@@ -140,114 +140,114 @@
   @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 </style>
 
-<header class="site-header"><img class="logo" src="../assets/kamus-catur-logo.png" alt="Kamus Catur"><div><div class="brand">Tournament Toolkit</div><div class="sub">Prize Winner List · Prize Structure</div></div><a class="back" href="../">← Semua alat</a></header>
+<header class="site-header"><img class="logo" src="../assets/kamus-catur-logo.png" alt="Kamus Catur"><div><div class="brand">Tournament Toolkit</div><div class="sub">Prize Winner List · Prize Structure</div></div><a class="back" href="../">← All tools</a></header>
 <div class="shell">
   <header class="masthead">
     <div>
       <h1>Prize Structure</h1>
-      <p>Cari pemenang Main Prize dan Special Prize daripada Final Ranking Chess-Results.</p>
+      <p>Find Main Prize and Special Prize winners from a Chess-Results Final Ranking.</p>
     </div>
     <span class="tag">Chess-Results</span>
   </header>
 
-  <div class="tabbar" id="tabbar" role="tablist" aria-label="Bahagian">
+  <div class="tabbar" id="tabbar" role="tablist" aria-label="Sections">
     <button type="button" role="tab" id="tab-data" data-tab="data" aria-controls="panel-data" aria-selected="true">
       <span class="n">1</span>Data<span class="count" id="count-data"></span></button>
-    <button type="button" role="tab" id="tab-hadiah" data-tab="hadiah" aria-controls="panel-hadiah" aria-selected="false" tabindex="-1">
-      <span class="n">2</span>Hadiah<span class="count" id="count-hadiah"></span></button>
-    <button type="button" role="tab" id="tab-pemenang" data-tab="pemenang" aria-controls="panel-pemenang" aria-selected="false" tabindex="-1">
-      <span class="n">3</span>Pemenang<span class="count" id="count-pemenang"></span></button>
+    <button type="button" role="tab" id="tab-prizes" data-tab="prizes" aria-controls="panel-prizes" aria-selected="false" tabindex="-1">
+      <span class="n">2</span>Prizes<span class="count" id="count-prizes"></span></button>
+    <button type="button" role="tab" id="tab-winners" data-tab="winners" aria-controls="panel-winners" aria-selected="false" tabindex="-1">
+      <span class="n">3</span>Winners<span class="count" id="count-winners"></span></button>
   </div>
 
   <section id="panel-data" role="tabpanel" aria-labelledby="tab-data">
     <div class="panel">
-      <h2>Data kejohanan</h2>
+      <h2>Tournament data</h2>
       <p class="data-title" id="data-title"></p>
       <p class="hint" id="data-sub"></p>
-      <div class="chips" id="chips" aria-label="Lajur dikesan"></div>
+      <div class="chips" id="chips" aria-label="Detected columns"></div>
       <div id="data-warn"></div>
       <div class="btn-row">
-        <button type="button" id="btn-paste-toggle" aria-expanded="false" aria-controls="paste-box">Tampal jadual sendiri</button>
-        <button type="button" id="btn-sample">Guna data contoh</button>
+        <button type="button" id="btn-paste-toggle" aria-expanded="false" aria-controls="paste-box">Paste your own table</button>
+        <button type="button" id="btn-sample">Use sample data</button>
       </div>
       <div id="paste-box" hidden>
-        <label class="lbl paste-lbl" for="paste-text">Jadual Final Ranking (salin daripada Chess-Results)</label>
+        <label class="lbl paste-lbl" for="paste-text">Final Ranking table (copy from Chess-Results)</label>
         <textarea id="paste-text" rows="6" spellcheck="false" placeholder="Rk.&#9;SNo&#9;&#9;Name&#9;sex&#9;Gr&#9;FED&#9;RtgI&#9;Pts.&#10;1&#9;3&#9;&#9;..."></textarea>
-        <button type="button" id="btn-use-paste" class="primary">Guna jadual ini</button>
+        <button type="button" id="btn-use-paste" class="primary">Use this table</button>
       </div>
       <p class="msg" id="data-msg" role="status" aria-live="polite"></p>
-      <p class="hint">Salin jadual Final Ranking daripada Chess-Results dan tampal di sini. Semua data diproses dalam pelayar anda.</p>
+      <p class="hint">Copy the Final Ranking table from Chess-Results and paste it here. All data is processed in your browser.</p>
       <details>
-        <summary>Semak data pemain</summary>
+        <summary>Review player data</summary>
         <div class="scroll"><table id="players-table"></table></div>
       </details>
     </div>
-    <div class="nav-row"><span></span><button type="button" class="primary" data-go="hadiah">Seterusnya: Hadiah →</button></div>
+    <div class="nav-row"><span></span><button type="button" class="primary" data-go="prizes">Next: Prizes →</button></div>
   </section>
 
-  <section id="panel-hadiah" role="tabpanel" aria-labelledby="tab-hadiah" hidden>
+  <section id="panel-prizes" role="tabpanel" aria-labelledby="tab-prizes" hidden>
     <div class="panel">
-      <h2>Peraturan pemenang</h2>
+      <h2>Winner rules</h2>
       <fieldset>
-        <legend>Seorang pemain boleh menerima</legend>
+        <legend>A player can receive</legend>
         <label for="mode-single"><input type="radio" name="mode" id="mode-single" value="single" checked>
-          <span>Satu hadiah sahaja, yang bernilai tertinggi. <span class="hint">Hadiah yang dilepaskan turun kepada pemain berkelayakan seterusnya.</span></span></label>
+          <span>One prize only, the highest value. <span class="hint">A released prize passes to the next eligible player.</span></span></label>
         <label for="mode-multi"><input type="radio" name="mode" id="mode-multi" value="multi">
-          <span>Lebih daripada satu hadiah</span></label>
+          <span>More than one prize</span></label>
       </fieldset>
     </div>
 
     <div class="panel">
-      <h2>Senarai hadiah</h2>
+      <h2>Prize list</h2>
       <div class="toolbar">
         <button type="button" id="add-main">+ Main Prize</button>
         <button type="button" id="add-special">+ Special Prize</button>
-        <button type="button" id="btn-template" class="ghost">Templat contoh</button>
+        <button type="button" id="btn-template" class="ghost">Sample template</button>
       </div>
-      <p class="hint">Jika dua hadiah bernilai sama, hadiah yang lebih atas diutamakan. Gunakan anak panah untuk menukar susunan.</p>
+      <p class="hint">If two prizes have the same value, the one higher in the list takes priority. Use the arrows to change the order.</p>
       <div id="prizes"></div>
-      <p class="empty" id="prizes-empty" hidden>Belum ada hadiah. Tambah hadiah atau guna templat contoh.</p>
+      <p class="empty" id="prizes-empty" hidden>No prizes yet. Add a prize or use the sample template.</p>
       <div class="exclude">
-        <label class="lbl" for="excluded">Pengecualian manual (SNo, pisahkan dengan koma)</label>
-        <input type="text" id="excluded" inputmode="numeric" placeholder="cth. 12, 31" autocomplete="off">
-        <p class="hint">Untuk pemain yang ditarik diri atau dibatalkan kelayakannya selepas ranking.</p>
+        <label class="lbl" for="excluded">Manual exclusions (SNo, separated by commas)</label>
+        <input type="text" id="excluded" inputmode="numeric" placeholder="e.g. 12, 31" autocomplete="off">
+        <p class="hint">For players who withdrew or were disqualified after the ranking.</p>
       </div>
     </div>
     <div class="nav-row">
       <button type="button" data-go="data">← Data</button>
-      <button type="button" class="primary" data-go="pemenang">Lihat pemenang →</button>
+      <button type="button" class="primary" data-go="winners">View winners →</button>
     </div>
   </section>
 
-  <section id="panel-pemenang" role="tabpanel" aria-labelledby="tab-pemenang" hidden>
+  <section id="panel-winners" role="tabpanel" aria-labelledby="tab-winners" hidden>
     <div class="panel">
-      <h2>Pemenang</h2>
+      <h2>Winners</h2>
       <div id="result"></div>
     </div>
-    <div class="nav-row"><button type="button" data-go="hadiah">← Ubah hadiah</button><span></span></div>
+    <div class="nav-row"><button type="button" data-go="prizes">← Edit prizes</button><span></span></div>
   </section>
 </div>
 
 <script>
-// Enjin pengagihan hadiah. Fungsi tulen, tanpa dependency, boleh dijalankan
-// di Node (ujian) dan di browser (UI).
+// Prize allocation engine. Pure functions, no dependencies, runnable
+// in Node (tests) and in the browser (UI).
 //
-// Pemain: { rank, snr, name, sex: 'M'|'F'|null, group, fed, club, type, rating, points }
+// Player: { rank, snr, name, sex: 'M'|'F'|null, group, fed, club, type, rating, points }
 // Config: {
 //   mode: 'single' | 'multi',
 //   excluded: [snr, ...],
 //   prizes: [{ name, type: 'main'|'special', filter, places: [{ amount, note? }, ...] }]
 // }
-// Filter (semua syarat yang ditetapkan mesti dipenuhi):
+// Filter (every condition that is set must be met):
 //   group: [..], club: [..], type: [..], fed: [..], sex: 'F'|'M', unrated: true|false,
-//   ratingMin, ratingMax (hanya pemain berating), rankMin, rankMax
+//   ratingMin, ratingMax (rated players only), rankMin, rankMax
 
 const norm = (s) => String(s ?? '').trim().toLowerCase();
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
 const list = (v) =>
   (Array.isArray(v) ? v : v == null || v === '' ? [] : [v]).map(norm).filter(Boolean);
 
-const FIELD_LABEL = { group: 'Gr', sex: 'jantina', club: 'Club/City', type: 'Jenis', fed: 'FED', rating: 'rating' };
+const FIELD_LABEL = { group: 'Gr', sex: 'sex', club: 'Club/City', type: 'Type', fed: 'FED', rating: 'rating' };
 
 function matchesFilter(p, f = {}) {
   const groups = list(f.group);
@@ -264,7 +264,7 @@ function matchesFilter(p, f = {}) {
   if (f.unrated === true && rated) return false;
   if (f.unrated === false && !rated) return false;
   if (isNum(f.ratingMin) || isNum(f.ratingMax)) {
-    if (!rated) return false; // julat rating hanya untuk pemain berating
+    if (!rated) return false; // rating ranges apply to rated players only
     if (isNum(f.ratingMin) && p.rating < f.ratingMin) return false;
     if (isNum(f.ratingMax) && p.rating > f.ratingMax) return false;
   }
@@ -293,29 +293,29 @@ function validateConfig(config, availability = null) {
   const errors = [];
   const warnings = [];
   if (!config || !Array.isArray(config.prizes) || config.prizes.length === 0) {
-    errors.push('Tiada hadiah ditetapkan.');
+    errors.push('No prizes have been set.');
     return { errors, warnings };
   }
   const single = config.mode !== 'multi';
   config.prizes.forEach((prize, i) => {
     const name = (prize.name || '').trim();
-    const label = name || `Hadiah #${i + 1}`;
-    if (!name) errors.push(`Hadiah #${i + 1} tiada nama.`);
+    const label = name || `Prize #${i + 1}`;
+    if (!name) errors.push(`Prize #${i + 1} has no name.`);
     if (!Array.isArray(prize.places) || prize.places.length === 0) {
-      errors.push(`${label}: tetapkan sekurang-kurangnya satu tempat.`);
+      errors.push(`${label}: set at least one place.`);
       return;
     }
     let prev = Infinity;
     prize.places.forEach((pl, j) => {
       const a = Number(pl.amount);
       if (!Number.isFinite(a) || a < 0) {
-        errors.push(`${label}: nilai tempat ke-${j + 1} tidak sah.`);
+        errors.push(`${label}: the value for place ${j + 1} is not valid.`);
         return;
       }
       if (single && a > prev) {
         errors.push(
-          `${label}: nilai tempat ke-${j + 1} (RM${a}) melebihi tempat ke-${j}. ` +
-            'Dalam mod satu hadiah seorang, nilai mesti menurun.'
+          `${label}: place ${j + 1} (RM${a}) is worth more than place ${j}. ` +
+            'In one-prize-per-player mode, values must not increase.'
         );
       }
       prev = a;
@@ -324,7 +324,7 @@ function validateConfig(config, availability = null) {
       for (const need of filterNeeds(prize.filter)) {
         if (availability[need] === false) {
           warnings.push(
-            `${label}: penapis ${FIELD_LABEL[need]} digunakan tetapi lajur itu tiada dalam data, jadi tiada pemain akan layak.`
+            `${label}: the ${FIELD_LABEL[need]} filter is used but that column is missing from the data, so no player will be eligible.`
           );
         }
       }
@@ -352,7 +352,7 @@ function buildSlots(prizes) {
   return slots;
 }
 
-// Setiap hadiah dikira berasingan: boleh menang lebih daripada satu hadiah.
+// Each prize is calculated separately: a player can win more than one prize.
 function runIndependent(slots, pool) {
   const result = new Map();
   const takenByPrize = new Map();
@@ -366,9 +366,9 @@ function runIndependent(slots, pool) {
   return result;
 }
 
-// Satu hadiah seorang: slot disusun dari nilai tertinggi; pemain yang sudah
-// menerima hadiah dilangkau dan slot turun kepada pemain berkelayakan seterusnya.
-// Nilai sama: ikut susunan hadiah dalam konfigurasi, kemudian tempat.
+// One prize per player: slots are ordered by highest value; a player who already
+// has a prize is skipped and the slot passes to the next eligible player.
+// Equal value: follow the prize order in the configuration, then the place.
 function runExclusive(slots, pool) {
   const order = [...slots].sort(
     (a, b) => b.amount - a.amount || a.prizeIndex - b.prizeIndex || a.place - b.place
@@ -411,7 +411,7 @@ function allocate(players, config, availability = null) {
     player: result.get(s.key) || null,
   }));
 
-  // Log: pemain yang layak satu hadiah tetapi menerima hadiah lain yang lebih tinggi.
+  // Log: players eligible for one prize who received a higher-value one instead.
   const conflicts = [];
   if (single) {
     const slotByKey = new Map(slots.map((s) => [s.key, s]));
@@ -431,16 +431,16 @@ function allocate(players, config, availability = null) {
 
   for (const a of awards) {
     if (!a.player) {
-      warnings.push(`${a.prizeName} tempat ke-${a.place}: tiada pemain berkelayakan.`);
+      warnings.push(`${a.prizeName} place ${a.place}: no eligible player.`);
     }
   }
   const totalAmount = awards.reduce((sum, a) => sum + (a.player ? a.amount : 0), 0);
   return { ok: true, mode: single ? 'single' : 'multi', errors: [], warnings, awards, conflicts, totalAmount };
 }
 
-// Parser Chess-Results: baca jadual Ranking daripada HTML (atau teks yang
-// ditampal) dan petakan lajur secara dinamik berdasarkan tajuk lajur, kerana
-// lajur yang dipaparkan berbeza antara kejohanan (sex, Gr, FED, Club/City, ...).
+// Chess-Results parser: reads the Ranking table from HTML (or pasted
+// text) and maps columns dynamically from the column headings, because
+// the displayed columns differ between tournaments (sex, Gr, FED, Club/City, ...).
 
 class ImportError extends Error {}
 
@@ -469,7 +469,7 @@ function cleanCell(html) {
 
 const normalizeHeader = (h) => String(h ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
-// tajuk lajur (dinormalkan) -> medan dalaman
+// column heading (normalised) -> internal field
 const HEADER_FIELDS = {
   rk: 'rank',
   rank: 'rank',
@@ -482,7 +482,7 @@ const HEADER_FIELDS = {
   group: 'group',
   fed: 'fed',
   type: 'type',
-  jenis: 'type',
+  jenis: 'type', // Malay heading, kept for tables copied from Malay sources
   typ: 'type',
   club: 'club',
   clubcity: 'club',
@@ -510,8 +510,8 @@ function mapHeaders(headers) {
 
 function extractRowsFromHtml(html) {
   const rows = [];
-  // Hanya <tr> paling dalam (tiada <tr> bersarang), supaya jadual yang
-  // dibalut jadual susun atur tetap dikesan.
+  // Only the innermost <tr> (no nested <tr>), so a table
+  // wrapped in a layout table is still detected.
   const trRe = /<tr\b[^>]*>((?:(?!<tr\b)[\s\S])*?)<\/tr>/gi;
   let m;
   while ((m = trRe.exec(html))) {
@@ -531,7 +531,7 @@ function parseRows(rows) {
   });
   if (hi < 0) {
     throw new ImportError(
-      'Jadual ranking (lajur Rk. dan Name) tidak dijumpai. Pastikan pautan ialah halaman Ranking / Final Ranking.'
+      'Ranking table (Rk. and Name columns) not found. Make sure you copied the Ranking / Final Ranking table.'
     );
   }
 
@@ -555,7 +555,7 @@ function parseRows(rows) {
     const rank = parseInt(r[idx.rank], 10);
     const snr = /^\d+$/.test(get('snr')) ? parseInt(get('snr'), 10) : rank;
     if (seen.has(snr)) {
-      warnings.push(`SNo ${snr} muncul lebih sekali; baris berulang diabaikan.`);
+      warnings.push(`SNo ${snr} appears more than once; the repeated row was ignored.`);
       continue;
     }
     seen.add(snr);
@@ -563,7 +563,7 @@ function parseRows(rows) {
     let sex = null;
     if (idx.sex !== undefined) {
       const v = get('sex').toLowerCase();
-      sex = v === 'w' || v === 'f' ? 'F' : 'M'; // lajur sex: hanya perempuan ditanda 'w'
+      sex = v === 'w' || v === 'f' ? 'F' : 'M'; // sex column: only women are marked 'w'
     }
     const ratingMatch = get('rating').match(/\d+/);
     const pts = parseFloat(get('points').replace(',', '.'));
@@ -588,9 +588,9 @@ function parseRows(rows) {
     });
   }
 
-  if (players.length === 0) throw new ImportError('Tiada baris pemain dijumpai dalam jadual.');
+  if (players.length === 0) throw new ImportError('No player rows were found in the table.');
   if (idx.snr === undefined) {
-    warnings.push('Lajur SNo tiada; Rk. digunakan sebagai pengenalan pemain.');
+    warnings.push('The SNo column is missing; Rk. is used to identify players.');
   }
   players.sort((a, b) => a.rank - b.rank || a.snr - b.snr);
 
@@ -623,13 +623,13 @@ function parseRankingHtml(html) {
   const { title, listTitle } = extractTitles(html);
   if (listTitle && !/final/i.test(listTitle)) {
     result.warnings.push(
-      `Senarai ini ialah "${listTitle}", bukan Final Ranking. Pastikan kejohanan sudah tamat.`
+      `This list is "${listTitle}", not the Final Ranking. Make sure the tournament has finished.`
     );
   }
   return { title, listTitle, ...result };
 }
 
-// Teks yang ditampal: HTML (view-source) atau jadual disalin daripada browser (dipisahkan tab).
+// Pasted text: HTML (view-source) or a table copied from the browser (tab-separated).
 function parseRankingText(text) {
   if (/<tr\b/i.test(text)) return parseRankingHtml(text);
   const rows = text
@@ -640,24 +640,24 @@ function parseRankingText(text) {
   return { title: '', listTitle: '', ...result };
 }
 
-// Bina semula URL ranking daripada mana-mana pautan halaman kejohanan Chess-Results.
-// URL dibina sendiri daripada ID kejohanan (digit sahaja), bukan disalin mentah.
+// Rebuild the ranking URL from any Chess-Results tournament page link.
+// The URL is built from the tournament ID (digits only), not copied as-is.
 function buildRankingUrl(input) {
   let u;
   try {
     u = new URL(String(input).trim());
   } catch {
-    throw new ImportError('Pautan tidak sah.');
+    throw new ImportError('Invalid link.');
   }
-  if (u.protocol !== 'https:' && u.protocol !== 'http:') throw new ImportError('Pautan tidak sah.');
+  if (u.protocol !== 'https:' && u.protocol !== 'http:') throw new ImportError('Invalid link.');
   const host = u.hostname.toLowerCase();
   if (!/(^|\.)chess-results\.com$/.test(host)) {
-    throw new ImportError('Pautan mesti daripada chess-results.com.');
+    throw new ImportError('The link must be from chess-results.com.');
   }
   const fromPath = u.pathname.match(/tnr(\d+)\.aspx/i);
   const id = fromPath ? fromPath[1] : u.searchParams.get('tnr');
   if (!id || !/^\d+$/.test(id)) {
-    throw new ImportError('ID kejohanan (tnr) tidak dijumpai dalam pautan.');
+    throw new ImportError('Tournament ID (tnr) not found in the link.');
   }
   const out = new URL(`https://${host}/tnr${id}.aspx`);
   out.searchParams.set('lan', '1');
@@ -668,7 +668,7 @@ function buildRankingUrl(input) {
   return { url: out.toString(), tournamentId: id };
 }
 
-// Pembantu konfigurasi untuk UI (tulen, boleh diuji di Node).
+// Configuration helpers for the UI (pure, testable in Node).
 
 function newFilter() {
   return {
@@ -724,7 +724,7 @@ function toAllocatorConfig({ mode, prizes, excludedText }) {
   };
 }
 
-// Templat contoh berdasarkan lajur yang dijumpai dalam data. Nilai hanyalah contoh.
+// Sample template based on the columns found in the data. Values are examples only.
 function templatePrizes(data) {
   const { players, fields } = data;
   const out = [];
@@ -765,7 +765,7 @@ function csvCell(v) {
 }
 
 function buildCsv(awards) {
-  const header = ['Hadiah', 'Jenis hadiah', 'Tempat', 'Nilai (RM)', 'Rk.', 'SNo', 'Nama', 'Gr', 'Club/City', 'Jenis', 'FED', 'Mata'];
+  const header = ['Prize', 'Prize type', 'Place', 'Value (RM)', 'Rk.', 'SNo', 'Name', 'Gr', 'Club/City', 'Type', 'FED', 'Points'];
   const lines = [header.map(csvCell).join(',')];
   for (const a of awards) {
     const p = a.player;
@@ -777,7 +777,7 @@ function buildCsv(awards) {
         a.amount,
         p ? p.rank : '',
         p ? p.snr : '',
-        p ? p.name : '(tiada pemenang)',
+        p ? p.name : '(no winner)',
         p ? p.group : '',
         p ? p.club : '',
         p ? p.type : '',
@@ -793,23 +793,23 @@ function buildCsv(awards) {
 
 </script>
 <script>
-// Antara muka. Fungsi allocate, parseRankingText, toAllocatorConfig,
-// templatePrizes, newPrize dan lain-lain ditakrifkan dalam skrip di atas.
+// User interface. Fungsi allocate, parseRankingText, toAllocatorConfig,
+// templatePrizes, newPrize and the rest are defined in the script above.
 const $ = (s) => document.querySelector(s);
 const esc = (s) =>
   String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const money = (n) => `RM${Number(n).toLocaleString('en-MY', { maximumFractionDigits: 2 })}`;
 
 const FIELD_LABELS = {
-  rank: 'Rk.', snr: 'SNo', name: 'Nama', sex: 'Jantina', group: 'Gr',
-  fed: 'FED', club: 'Club/City', type: 'Jenis', rating: 'Rating', points: 'Mata',
+  rank: 'Rk.', snr: 'SNo', name: 'Name', sex: 'Sex', group: 'Gr',
+  fed: 'FED', club: 'Club/City', type: 'Type', rating: 'Rating', points: 'Points',
 };
 const OPTIONAL_FIELDS = ['sex', 'group', 'club', 'type', 'fed', 'rating'];
 const MAX_CHIPS = 12;
 
 const state = { data: null, mode: 'single', prizes: [], excludedText: '' };
 
-/* ---------- data contoh (struktur sebenar, nama dan kelab rekaan) ---------- */
+/* ---------- sample data (real structure, made-up names and clubs) ---------- */
 // [Rk, SNo, sex, Gr, RtgI, Pts]
 const SAMPLE = [
   [1,3,'','U9',1615,'5,5'],[2,1,'','U9',1667,'5'],[3,2,'','',1644,'5'],[4,5,'w','U9',1431,'5'],
@@ -841,7 +841,7 @@ function sampleText() {
 }
 
 function loadSample() {
-  state.data = { title: 'Kejohanan Contoh U12', listTitle: 'Final Ranking after 6 Rounds', isSample: true, ...parseRankingText(sampleText()) };
+  state.data = { ...parseRankingText(sampleText()), title: 'Sample U12 Tournament', listTitle: 'Final Ranking after 6 Rounds', isSample: true };
   const prizes = templatePrizes(state.data);
   const club = newPrize('special', 'Best Kelab Catur Bangsar');
   club.filter.club = ['Kelab Catur Bangsar'];
@@ -851,7 +851,7 @@ function loadSample() {
   state.excludedText = '';
 }
 
-/* ---------- paparan data ---------- */
+/* ---------- data view ---------- */
 function setMsg(text, kind = '') {
   const el = $('#data-msg');
   el.textContent = text;
@@ -860,13 +860,13 @@ function setMsg(text, kind = '') {
 
 function renderData() {
   const d = state.data;
-  $('#data-title').textContent = d.title || 'Kejohanan';
-  $('#data-sub').textContent = `${d.listTitle ? d.listTitle + ' · ' : ''}${d.players.length} pemain${d.isSample ? ' · data contoh, nama rekaan' : ''}`;
+  $('#data-title').textContent = d.title || 'Tournament';
+  $('#data-sub').textContent = `${d.listTitle ? d.listTitle + ' · ' : ''}${d.players.length} players${d.isSample ? ' · sample data, made-up names' : ''}`;
   const detected = d.columns.filter((c) => c.field);
   const missing = OPTIONAL_FIELDS.filter((f) => !d.fields[f]);
   $('#chips').innerHTML =
     detected.map((c) => `<span class="chip">${esc(c.header)} <small>→ ${esc(FIELD_LABELS[c.field])}</small></span>`).join('') +
-    missing.map((f) => `<span class="chip missing">tiada: ${esc(FIELD_LABELS[f])}</span>`).join('');
+    missing.map((f) => `<span class="chip missing">missing: ${esc(FIELD_LABELS[f])}</span>`).join('');
   $('#data-warn').innerHTML = d.warnings.length
     ? `<div class="notice warn"><ul>${d.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul></div>`
     : '';
@@ -886,19 +886,19 @@ function renderData() {
       }).join('')}</tr>`).join('') + '</tbody>';
 }
 
-/* ---------- kad hadiah ---------- */
+/* ---------- prize cards ---------- */
 const uniq = (key) =>
   [...new Set(state.data.players.map((p) => p[key]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ms'));
 
 function multiControl(i, kind, label, selected) {
   const values = uniq(kind);
-  if (!values.length) return `<div><span class="lbl">${esc(label)}</span><span class="hint">Tiada nilai dalam data</span></div>`;
+  if (!values.length) return `<div><span class="lbl">${esc(label)}</span><span class="hint">No values in the data</span></div>`;
   if (values.length <= MAX_CHIPS) {
     return `<div><span class="lbl">${esc(label)}</span><div class="chips">${values.map((v, k) =>
       `<label class="chip" for="p${i}-${kind}-${k}"><input type="checkbox" id="p${i}-${kind}-${k}" data-multi="${kind}" value="${esc(v)}"${selected.includes(v) ? ' checked' : ''}> ${esc(v)}</label>`
     ).join('')}</div></div>`;
   }
-  return `<div><label class="lbl" for="p${i}-${kind}">${esc(label)} (Ctrl/Cmd untuk pilih banyak)</label>
+  return `<div><label class="lbl" for="p${i}-${kind}">${esc(label)} (Ctrl/Cmd to select several)</label>
     <select multiple size="6" id="p${i}-${kind}" data-multi="${kind}">${values.map((v) =>
       `<option value="${esc(v)}"${selected.includes(v) ? ' selected' : ''}>${esc(v)}</option>`).join('')}</select></div>`;
 }
@@ -907,15 +907,15 @@ function filterSummary(p) {
   const f = p.filter;
   const parts = [];
   if (f.group.length) parts.push(`Gr ${f.group.join(', ')}`);
-  if (f.sex) parts.push(f.sex === 'F' ? 'Perempuan' : 'Lelaki');
+  if (f.sex) parts.push(f.sex === 'F' ? 'Female' : 'Male');
   if (f.club.length) parts.push(f.club.join(', '));
-  if (f.type.length) parts.push(`Jenis ${f.type.join(', ')}`);
+  if (f.type.length) parts.push(`Type ${f.type.join(', ')}`);
   if (f.fed.length) parts.push(`FED ${f.fed.join(', ')}`);
   if (f.unrated === 'yes') parts.push('Unrated');
-  if (f.unrated === 'no') parts.push('Berating');
+  if (f.unrated === 'no') parts.push('Rated');
   if (f.ratingMin !== '' || f.ratingMax !== '') parts.push(`Rating ${f.ratingMin || 0}–${f.ratingMax || '∞'}`);
   if (f.rankMin !== '' || f.rankMax !== '') parts.push(`Rk. ${f.rankMin || 1}–${f.rankMax || 'akhir'}`);
-  return parts.length ? parts.join(' · ') : 'Semua pemain';
+  return parts.length ? parts.join(' · ') : 'All players';
 }
 
 function prizeSummary(p) {
@@ -929,48 +929,48 @@ function prizeCard(p, i) {
   return `
   <article class="prize" data-p="${i}">
     <div class="prize-head">
-      <input type="text" id="p${i}-name" data-k="name" value="${esc(p.name)}" placeholder="Nama hadiah (cth. Best Girls)" aria-label="Nama hadiah">
-      <select id="p${i}-type" data-k="type" aria-label="Jenis hadiah">
+      <input type="text" id="p${i}-name" data-k="name" value="${esc(p.name)}" placeholder="Prize name (e.g. Best Girls)" aria-label="Prize name">
+      <select id="p${i}-type" data-k="type" aria-label="Prize type">
         <option value="main"${p.type === 'main' ? ' selected' : ''}>Main Prize</option>
         <option value="special"${p.type === 'special' ? ' selected' : ''}>Special Prize</option>
       </select>
       <div class="btns">
-        <button type="button" class="icon ghost" data-act="up" aria-label="Naikkan keutamaan"${i === 0 ? ' disabled' : ''}>↑</button>
-        <button type="button" class="icon ghost" data-act="down" aria-label="Turunkan keutamaan"${i === state.prizes.length - 1 ? ' disabled' : ''}>↓</button>
-        <button type="button" class="ghost" data-act="toggle" aria-expanded="${p.open ? 'true' : 'false'}">${p.open ? 'Tutup' : 'Ubah'}</button>
-        <button type="button" class="ghost" data-act="del-prize">Buang</button>
+        <button type="button" class="icon ghost" data-act="up" aria-label="Move up (higher priority)"${i === 0 ? ' disabled' : ''}>↑</button>
+        <button type="button" class="icon ghost" data-act="down" aria-label="Move down (lower priority)"${i === state.prizes.length - 1 ? ' disabled' : ''}>↓</button>
+        <button type="button" class="ghost" data-act="toggle" aria-expanded="${p.open ? 'true' : 'false'}">${p.open ? 'Close' : 'Edit'}</button>
+        <button type="button" class="ghost" data-act="del-prize">Remove</button>
       </div>
     </div>
     <p class="prize-sum">${prizeSummary(p)}</p>
     <div class="prize-body"${p.open ? '' : ' hidden'}>
     <div class="filters">
-      ${fields.group ? multiControl(i, 'group', 'Kategori (Gr)', f.group) : ''}
-      ${fields.sex ? `<div><label class="lbl" for="p${i}-sex">Jantina</label><select id="p${i}-sex" data-f="sex">
-          <option value=""${f.sex === '' ? ' selected' : ''}>Semua</option>
-          <option value="F"${f.sex === 'F' ? ' selected' : ''}>Perempuan sahaja</option>
-          <option value="M"${f.sex === 'M' ? ' selected' : ''}>Lelaki sahaja</option></select></div>` : ''}
-      ${fields.type ? multiControl(i, 'type', 'Jenis', f.type) : ''}
+      ${fields.group ? multiControl(i, 'group', 'Category (Gr)', f.group) : ''}
+      ${fields.sex ? `<div><label class="lbl" for="p${i}-sex">Sex</label><select id="p${i}-sex" data-f="sex">
+          <option value=""${f.sex === '' ? ' selected' : ''}>All</option>
+          <option value="F"${f.sex === 'F' ? ' selected' : ''}>Female only</option>
+          <option value="M"${f.sex === 'M' ? ' selected' : ''}>Male only</option></select></div>` : ''}
+      ${fields.type ? multiControl(i, 'type', 'Type', f.type) : ''}
       ${fields.club ? multiControl(i, 'club', 'Club/City', f.club) : ''}
       ${fields.fed && uniq('fed').length > 1 ? multiControl(i, 'fed', 'FED', f.fed) : ''}
       ${fields.rating ? `<div><label class="lbl" for="p${i}-unrated">Rating</label><select id="p${i}-unrated" data-f="unrated">
-          <option value=""${f.unrated === '' ? ' selected' : ''}>Semua</option>
-          <option value="yes"${f.unrated === 'yes' ? ' selected' : ''}>Unrated sahaja</option>
-          <option value="no"${f.unrated === 'no' ? ' selected' : ''}>Berating sahaja</option></select></div>
-        <div><span class="lbl">Julat rating (pemain berating)</span><div class="range">
-          <input type="number" min="0" id="p${i}-rmin" data-f="ratingMin" value="${esc(f.ratingMin)}" placeholder="Min" aria-label="Rating minimum">
+          <option value=""${f.unrated === '' ? ' selected' : ''}>All</option>
+          <option value="yes"${f.unrated === 'yes' ? ' selected' : ''}>Unrated only</option>
+          <option value="no"${f.unrated === 'no' ? ' selected' : ''}>Rated only</option></select></div>
+        <div><span class="lbl">Rating range (rated players)</span><div class="range">
+          <input type="number" min="0" id="p${i}-rmin" data-f="ratingMin" value="${esc(f.ratingMin)}" placeholder="Min" aria-label="Minimum rating">
           <span>–</span>
-          <input type="number" min="0" id="p${i}-rmax" data-f="ratingMax" value="${esc(f.ratingMax)}" placeholder="Maks" aria-label="Rating maksimum"></div></div>` : ''}
-      <div><span class="lbl">Julat kedudukan (Rk.)</span><div class="range">
-        <input type="number" min="1" id="p${i}-kmin" data-f="rankMin" value="${esc(f.rankMin)}" placeholder="Dari" aria-label="Kedudukan dari">
+          <input type="number" min="0" id="p${i}-rmax" data-f="ratingMax" value="${esc(f.ratingMax)}" placeholder="Max" aria-label="Maximum rating"></div></div>` : ''}
+      <div><span class="lbl">Rank range (Rk.)</span><div class="range">
+        <input type="number" min="1" id="p${i}-kmin" data-f="rankMin" value="${esc(f.rankMin)}" placeholder="From" aria-label="Rank from">
         <span>–</span>
-        <input type="number" min="1" id="p${i}-kmax" data-f="rankMax" value="${esc(f.rankMax)}" placeholder="Hingga" aria-label="Kedudukan hingga"></div></div>
+        <input type="number" min="1" id="p${i}-kmax" data-f="rankMax" value="${esc(f.rankMax)}" placeholder="To" aria-label="Rank to"></div></div>
     </div>
     <div class="places">
-      <span class="lbl">Nilai hadiah (RM)</span>
-      ${p.places.map((a, j) => `<div class="place"><span class="no">Tempat ${j + 1}</span>
-        <input type="number" min="0" step="any" id="p${i}-place-${j}" data-place="${j}" value="${esc(a)}" placeholder="0" aria-label="Nilai tempat ${j + 1}">
-        <button type="button" class="icon ghost" data-act="del-place" data-place="${j}" aria-label="Buang tempat ${j + 1}"${p.places.length === 1 ? ' disabled' : ''}>×</button></div>`).join('')}
-      <div class="btn-row"><button type="button" data-act="add-place">+ Tempat</button></div>
+      <span class="lbl">Prize value (RM)</span>
+      ${p.places.map((a, j) => `<div class="place"><span class="no">Place ${j + 1}</span>
+        <input type="number" min="0" step="any" id="p${i}-place-${j}" data-place="${j}" value="${esc(a)}" placeholder="0" aria-label="Value of place ${j + 1}">
+        <button type="button" class="icon ghost" data-act="del-place" data-place="${j}" aria-label="Remove place ${j + 1}"${p.places.length === 1 ? ' disabled' : ''}>×</button></div>`).join('')}
+      <div class="btn-row"><button type="button" data-act="add-place">+ Place</button></div>
     </div>
     </div>
   </article>`;
@@ -984,13 +984,13 @@ function renderPrizes() {
   $('#excluded').value = state.excludedText;
 }
 
-/* ---------- keputusan (dikira semula setiap kali ada perubahan) ---------- */
+/* ---------- results (recalculated on every change) ---------- */
 let lastResult = null;
 
 function updateCounts(res) {
   $('#count-data').textContent = String(state.data.players.length);
-  $('#count-hadiah').textContent = String(state.prizes.length);
-  const c = $('#count-pemenang');
+  $('#count-prizes').textContent = String(state.prizes.length);
+  const c = $('#count-winners');
   if (res.ok) {
     c.textContent = String(new Set(res.awards.filter((a) => a.player).map((a) => a.player.snr)).size);
     c.className = 'count';
@@ -998,7 +998,7 @@ function updateCounts(res) {
   } else {
     c.textContent = '!';
     c.className = 'count bad';
-    c.title = 'Ada ralat dalam konfigurasi hadiah';
+    c.title = 'There are errors in the prize configuration';
   }
 }
 
@@ -1029,10 +1029,10 @@ function renderResult() {
     const h = rows[0];
     return `<div><h3>${esc(h.prizeName)}<span class="badge ${h.type === 'main' ? 'main' : ''}">${h.type === 'main' ? 'Main' : 'Special'}</span></h3>
     <div class="scroll"><table>
-      <thead><tr><th>#</th><th class="num">Nilai</th><th class="num">Rk.</th><th>Nama</th>${showGroup ? '<th>Gr</th>' : ''}${showClub ? '<th>Club/City</th>' : ''}${d.fields.type ? '<th>Jenis</th>' : ''}</tr></thead>
+      <thead><tr><th>#</th><th class="num">Value</th><th class="num">Rk.</th><th>Name</th>${showGroup ? '<th>Gr</th>' : ''}${showClub ? '<th>Club/City</th>' : ''}${d.fields.type ? '<th>Type</th>' : ''}</tr></thead>
       <tbody>${rows.map((a) => a.player
         ? `<tr><td>${a.place}</td><td class="num amt">${money(a.amount)}</td><td class="num">${a.player.rank}</td><td>${esc(a.player.name)}</td>${showGroup ? `<td>${esc(a.player.group)}</td>` : ''}${showClub ? `<td>${esc(a.player.club)}</td>` : ''}${d.fields.type ? `<td>${esc(a.player.type)}</td>` : ''}</tr>`
-        : `<tr class="vacant"><td>${a.place}</td><td class="num">${money(a.amount)}</td><td colspan="${2 + extra}">tiada pemain berkelayakan</td></tr>`
+        : `<tr class="vacant"><td>${a.place}</td><td class="num">${money(a.amount)}</td><td colspan="${2 + extra}">no eligible player</td></tr>`
       ).join('')}</tbody></table></div></div>`;
   }).join('');
 
@@ -1041,8 +1041,8 @@ function renderResult() {
 
   let log = '';
   if (res.conflicts.length) {
-    log = `<h3>Layak lebih daripada satu hadiah</h3><ul class="log">${res.conflicts.map((c) =>
-      `<li>${esc(c.player.name)} (Rk. ${c.player.rank}) layak ${esc(c.lost.prizeName)} tempat ${c.lost.place} (${money(c.lost.amount)}), tetapi menerima ${esc(c.kept.prizeName)} tempat ${c.kept.place} (${money(c.kept.amount)}).</li>`).join('')}</ul>`;
+    log = `<h3>Eligible for more than one prize</h3><ul class="log">${res.conflicts.map((c) =>
+      `<li>${esc(c.player.name)} (Rk. ${c.player.rank}) is eligible for ${esc(c.lost.prizeName)} place ${c.lost.place} (${money(c.lost.amount)}) but receives ${esc(c.kept.prizeName)} place ${c.kept.place} (${money(c.kept.amount)}).</li>`).join('')}</ul>`;
   } else if (res.mode === 'multi') {
     const by = new Map();
     for (const a of winners) {
@@ -1051,29 +1051,29 @@ function renderResult() {
     }
     const many = [...by.values()].filter((x) => x.l.length > 1);
     if (many.length) {
-      log = `<h3>Menang lebih daripada satu hadiah</h3><ul class="log">${many.map((x) =>
-        `<li>${esc(x.p.name)} (Rk. ${x.p.rank}): ${x.l.map((a) => `${esc(a.prizeName)} tempat ${a.place}`).join(', ')}. Jumlah ${money(x.l.reduce((s, a) => s + a.amount, 0))}</li>`).join('')}</ul>`;
+      log = `<h3>Wins more than one prize</h3><ul class="log">${many.map((x) =>
+        `<li>${esc(x.p.name)} (Rk. ${x.p.rank}): ${x.l.map((a) => `${esc(a.prizeName)} place ${a.place}`).join(', ')}. Total ${money(x.l.reduce((s, a) => s + a.amount, 0))}</li>`).join('')}</ul>`;
     }
   }
 
   box.innerHTML = `
-    <div class="res-meta"><strong>${esc(d.title || 'Kejohanan')}</strong>
-      <span>${res.mode === 'single' ? 'Satu hadiah seorang' : 'Boleh menang lebih daripada satu'}</span></div>
+    <div class="res-meta"><strong>${esc(d.title || 'Tournament')}</strong>
+      <span>${res.mode === 'single' ? 'One prize per player' : 'Players can win more than one'}</span></div>
     ${list(res.warnings, 'warn')}<div class="res-grid">${blocks}</div>
-    <div class="total"><span>Jumlah hadiah · ${winnerCount} pemenang</span><span class="num">${money(res.totalAmount)}</span></div>
+    <div class="total"><span>Total prizes · ${winnerCount} winners</span><span class="num">${money(res.totalAmount)}</span></div>
     ${log}
-    <div class="btn-row"><button type="button" id="btn-copy" class="primary">Salin keputusan</button><button type="button" id="btn-csv">Muat turun CSV</button></div>
-    <p class="hint">Gunakan Salin keputusan untuk tampal terus ke Excel, atau muat turun CSV.</p>
+    <div class="btn-row"><button type="button" id="btn-copy" class="primary">Copy results</button><button type="button" id="btn-csv">Download CSV</button></div>
+    <p class="hint">Use Copy results to paste straight into Excel, or download the CSV.</p>
     <p class="msg" id="copy-msg" role="status" aria-live="polite"></p>
-    <textarea id="copy-fallback" rows="5" readonly hidden aria-label="Keputusan untuk disalin"></textarea>`;
+    <textarea id="copy-fallback" rows="5" readonly hidden aria-label="Results to copy"></textarea>`;
 }
 
 function resultsAsTsv(res) {
-  const rows = [['Hadiah', 'Jenis hadiah', 'Tempat', 'Nilai (RM)', 'Rk.', 'SNo', 'Nama', 'Gr', 'Club/City', 'Jenis', 'FED', 'Mata']];
+  const rows = [['Prize', 'Prize type', 'Place', 'Value (RM)', 'Rk.', 'SNo', 'Name', 'Gr', 'Club/City', 'Type', 'FED', 'Points']];
   for (const a of res.awards) {
     const p = a.player;
     rows.push([a.prizeName, a.type === 'main' ? 'Main' : 'Special', a.place, a.amount,
-      p ? p.rank : '', p ? p.snr : '', p ? p.name : '(tiada pemenang)', p ? p.group : '', p ? p.club : '', p ? p.type : '', p ? p.fed : '', p && p.points != null ? p.points : '']);
+      p ? p.rank : '', p ? p.snr : '', p ? p.name : '(no winner)', p ? p.group : '', p ? p.club : '', p ? p.type : '', p ? p.fed : '', p && p.points != null ? p.points : '']);
   }
   return rows.map((r) => r.map((c) => String(c).replace(/[\t\r\n]+/g, ' ')).join('\t')).join('\n');
 }
@@ -1088,11 +1088,11 @@ async function copyResults() {
     ta.value = text;
     ta.focus();
     ta.select();
-    msg.textContent = 'Tekan Ctrl+C (atau Cmd+C) untuk menyalin, kemudian tampal dalam Excel.';
+    msg.textContent = 'Press Ctrl+C (or Cmd+C) to copy, then paste into Excel.';
   };
   try {
     await navigator.clipboard.writeText(text);
-    msg.textContent = 'Disalin. Tampal terus dalam Excel atau Google Sheets.';
+    msg.textContent = 'Copied. Paste straight into Excel or Google Sheets.';
   } catch {
     fallback();
   }
@@ -1163,7 +1163,7 @@ for (const r of document.querySelectorAll('input[name="mode"]')) {
 $('#excluded').addEventListener('input', (e) => { state.excludedText = e.target.value; refresh(); });
 function addPrize(type) {
   const p = newPrize(type);
-  p.open = true; // hadiah baharu dibuka supaya terus boleh diisi
+  p.open = true; // new prizes open so they can be filled in right away
   state.prizes.push(p);
   renderPrizes();
   refresh();
@@ -1179,20 +1179,20 @@ $('#btn-paste-toggle').addEventListener('click', (e) => {
   e.currentTarget.setAttribute('aria-expanded', String(!box.hidden));
   if (!box.hidden) $('#paste-text').focus();
 });
-$('#btn-sample').addEventListener('click', () => { loadSample(); setMsg('Data contoh dimuatkan.', 'ok'); renderAll(); });
+$('#btn-sample').addEventListener('click', () => { loadSample(); setMsg('Sample data loaded.', 'ok'); renderAll(); });
 $('#btn-use-paste').addEventListener('click', () => {
   const text = $('#paste-text').value;
-  if (!text.trim()) return setMsg('Tampal jadual ranking dahulu.', 'error');
+  if (!text.trim()) return setMsg('Paste the ranking table first.', 'error');
   try {
     const parsed = parseRankingText(text);
-    state.data = { title: parsed.title || 'Kejohanan anda', listTitle: parsed.listTitle || '', ...parsed };
+    state.data = { title: parsed.title || 'Your tournament', listTitle: parsed.listTitle || '', ...parsed };
     state.prizes = templatePrizes(state.data);
     state.mode = 'single';
     state.excludedText = '';
-    setMsg(`${parsed.players.length} pemain dimuatkan. Templat hadiah contoh digunakan, sila ubah nilainya.`, 'ok');
+    setMsg(`${parsed.players.length} players loaded. A sample prize template is in use; please adjust the values.`, 'ok');
     renderAll();
   } catch (err) {
-    setMsg(err.message || 'Jadual tidak dapat dibaca.', 'error');
+    setMsg(err.message || 'The table could not be read.', 'error');
   }
 });
 
@@ -1209,8 +1209,8 @@ $('#result').addEventListener('click', (e) => {
   else if (e.target.id === 'btn-csv') downloadCsv();
 });
 
-/* ---------- tab ---------- */
-const TABS = ['data', 'hadiah', 'pemenang'];
+/* ---------- tabs ---------- */
+const TABS = ['data', 'prizes', 'winners'];
 
 function showTab(name) {
   const current = TABS.includes(name) ? name : 'data';
@@ -1229,7 +1229,7 @@ function go(name) {
     if (location.hash !== `#${name}`) location.hash = name;
     window.scrollTo(0, 0);
   } catch {
-    /* di luar pelayar: abaikan */
+    /* outside a browser: ignore */
   }
 }
 
