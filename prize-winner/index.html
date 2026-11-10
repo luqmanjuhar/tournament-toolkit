@@ -144,13 +144,34 @@
     .tabbar button { padding-inline: 6px; gap: 5px; font-size: 0.88rem; }
   }
   @media print {
-    body { background: #fff; color: #000; }
-    .site-header, .tabbar, .nav-row, .btn-row, #panel-data, #panel-prizes, .site-footer, #copy-fallback, .msg { display: none !important; }
+    @page { size: A4; margin: 14mm 12mm; }
+    :root { --bg: #fff; --surface: #fff; --surface-2: #f3f3f3; --fg: #000; --ink: #000; --muted: #444; --line: #bbb; --prize: #000; --prize-soft: #fff; --soft: #fff; --gold-text: #000; }
+    html, body { background: #fff; color: #000; }
+    body { font-size: 10pt; padding: 0; }
+    .site-header, .masthead, .tabbar, .nav-row, .btn-row, #panel-data, #panel-prizes, .site-footer,
+    #copy-fallback, .msg, .no-print, .panel h2 { display: none !important; }
     #panel-winners { display: block !important; }
-    .panel { border: 0; padding: 0; }
-    .scroll { max-height: none; overflow: visible; }
-    .res-grid > div, tr { break-inside: avoid; }
-    :root { --bg: #fff; --surface: #fff; --surface-2: #f4f4f4; --fg: #000; --ink: #000; --muted: #444; --line: #bbb; }
+    .shell { max-width: none; padding: 0; }
+    .panel { border: 0; padding: 0; margin: 0; background: #fff; }
+    .res-meta { display: block; margin-bottom: 4mm; padding-bottom: 3mm; border-bottom: 2px solid #000; }
+    .res-meta strong { display: block; font-size: 18pt; }
+    .res-meta span { display: block; margin-top: 1mm; }
+    .res-meta + .hint { margin: 0 0 5mm; font-size: 10pt; color: #000; }
+    .res-grid { display: block; }
+    .res-grid > div { margin: 0 0 6mm; break-inside: avoid; page-break-inside: avoid; }
+    h3 { font-size: 12pt; margin: 0 0 2mm; }
+    .badge, .badge.main { background: none; color: #000; border: 1px solid #000; padding: 0 6px; }
+    .scroll { max-height: none; overflow: visible; border: 0; margin: 0; }
+    table { width: 100%; table-layout: auto; border-collapse: collapse; font-size: 10pt; }
+    th, td { white-space: normal; padding: 3px 6px; border-bottom: 1px solid #999; text-align: left; }
+    th { position: static; background: #eee; border-top: 1px solid #000; border-bottom: 1px solid #000; }
+    th.num, td.num { text-align: right; white-space: nowrap; }
+    td.amt { color: #000; }
+    tr { break-inside: avoid; page-break-inside: avoid; }
+    thead { display: table-header-group; }
+    .notice { background: none; border: 1px solid #999; color: #000; font-size: 9pt; margin: 0 0 5mm; }
+    .total { border-top: 2px solid #000; margin-top: 2mm; padding-top: 3mm; break-inside: avoid; }
+    .total .num { color: #000; font-size: 14pt; }
   }
   @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 </style>
@@ -559,8 +580,8 @@ function renderResult() {
 
   let log = '';
   if (res.conflicts.length) {
-    log = `<h3>Eligible for more than one prize</h3><ul class="log">${res.conflicts.map((c) =>
-      `<li>${esc(c.player.name)} (Rk. ${c.player.rank}) is eligible for ${esc(c.lost.prizeName)} place ${c.lost.place} (${money(c.lost.amount)}) but receives ${esc(c.kept.prizeName)} place ${c.kept.place} (${money(c.kept.amount)}).</li>`).join('')}</ul>`;
+    log = `<div class="no-print"><h3>Eligible for more than one prize</h3><ul class="log">${res.conflicts.map((c) =>
+      `<li>${esc(c.player.name)} (Rk. ${c.player.rank}) is eligible for ${esc(c.lost.prizeName)} place ${c.lost.place} (${money(c.lost.amount)}) but receives ${esc(c.kept.prizeName)} place ${c.kept.place} (${money(c.kept.amount)}).</li>`).join('')}</ul></div>`;
   } else if (res.mode === 'multi') {
     const by = new Map();
     for (const a of winners) {
@@ -582,7 +603,7 @@ function renderResult() {
     <div class="total"><span>Total prizes · ${winnerCount} winners</span><span class="num">${money(res.totalAmount)}</span></div>
     ${log}
     <div class="btn-row"><button type="button" id="btn-copy" class="primary">Copy results</button><button type="button" id="btn-xlsx">Download Excel</button><button type="button" id="btn-csv">Download CSV</button><button type="button" id="btn-pdf">Print / Save as PDF</button></div>
-    <p class="hint">Copy results to paste into Excel, download Excel or CSV, or use Print / Save as PDF for a printable winner list.</p>
+    <p class="hint no-print">Copy results to paste into Excel, download Excel or CSV, or use Print / Save as PDF for a printable winner list.</p>
     <p class="msg" id="copy-msg" role="status" aria-live="polite"></p>
     <textarea id="copy-fallback" rows="5" readonly hidden aria-label="Results to copy"></textarea>`;
 }
