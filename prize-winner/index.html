@@ -116,6 +116,9 @@
   .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
   .info-grid .wide { grid-column: 1 / -1; }
   .req { color: var(--bad); }
+  .chk { display: flex; gap: 8px; align-items: flex-start; font-weight: 500; }
+  .chk input { margin-top: 4px; }
+  .signoff { display: none; }
   .gate { margin: 10px 0 0; font-size: 0.88rem; color: var(--warn); background: var(--warn-soft); border-radius: 8px; padding: 8px 12px; }
   .gate:empty { display: none; }
 
@@ -172,6 +175,13 @@
     .notice { background: none; border: 1px solid #999; color: #000; font-size: 9pt; margin: 0 0 5mm; }
     .total { border-top: 2px solid #000; margin-top: 2mm; padding-top: 3mm; break-inside: avoid; }
     .total .num { color: #000; font-size: 14pt; }
+    .signoff.on { display: block; margin-top: 14mm; break-inside: avoid; page-break-inside: avoid; }
+    .signoff-note { margin: 0 0 12mm; font-weight: 600; }
+    .signoff-row { display: flex; gap: 20mm; }
+    .signoff-box { flex: 1; }
+    .signoff-line { border-bottom: 1px solid #000; height: 18mm; }
+    .signoff-role { font-weight: 700; margin-top: 2mm; }
+    .signoff-field { margin-top: 3mm; min-height: 6mm; border-bottom: 1px dotted #777; }
   }
   @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 </style>
@@ -287,6 +297,27 @@
     <div class="panel">
       <h2>Winners</h2>
       <div id="result"></div>
+      <div class="signoff" id="signoff" aria-hidden="true">
+        <p class="signoff-note" id="so-note">Results confirmed by:</p>
+        <div class="signoff-row">
+          <div class="signoff-box"><div class="signoff-line"></div><div class="signoff-role">Chief Arbiter</div>
+            <div class="signoff-field">Name: <span id="so-arbiter-print"></span></div><div class="signoff-field">Date:</div></div>
+          <div class="signoff-box"><div class="signoff-line"></div><div class="signoff-role">Organizer</div>
+            <div class="signoff-field">Name: <span id="so-organizer-print"></span></div><div class="signoff-field">Date:</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel no-print" id="signoff-controls">
+      <h3>Sign-off (printed PDF)</h3>
+      <label class="chk" for="so-on"><input type="checkbox" id="so-on" checked>
+        <span>Add a sign-off block for the Chief Arbiter and Organizer at the bottom of the PDF</span></label>
+      <div class="info-grid" style="margin-top:10px">
+        <div><label class="lbl" for="so-arbiter">Chief Arbiter name (optional)</label>
+          <input type="text" id="so-arbiter" autocomplete="off" placeholder="Leave blank to write by hand"></div>
+        <div><label class="lbl" for="so-organizer">Organizer name (optional)</label>
+          <input type="text" id="so-organizer" autocomplete="off" placeholder="Leave blank to write by hand"></div>
+      </div>
+      <p class="hint">Review the winners before signing. The sign-off block only appears when you use Print / Save as PDF.</p>
     </div>
     <div class="nav-row"><button type="button" data-go="prizes">← Edit prizes</button><span></span></div>
   </section>
@@ -639,7 +670,7 @@ async function copyResults() {
 }
 
 /* ---------- peristiwa ---------- */
-function refresh() { renderResult(); }
+function refresh() { renderResult(); syncSignoff(); }
 
 function onPrizeInput(e) {
   const t = e.target;
@@ -712,13 +743,21 @@ for (const el of document.querySelectorAll('[data-info]')) {
     state.info[el.dataset.info] = el.value;
     if (state.data) state.data.title = tournamentName();
     updateGate();
-    if (state.data) renderResult();
+    if (state.data) { renderResult(); syncSignoff(); }
   });
 }
 for (const r of document.querySelectorAll('input[name="priority"]')) {
   r.addEventListener('change', () => { state.priority = r.value; refresh(); });
 }
 $('#medal-excl').addEventListener('change', (e) => { state.medalExclusive = e.target.checked; refresh(); });
+function syncSignoff() {
+  $('#signoff').classList.toggle('on', $('#so-on').checked);
+  $('#so-note').textContent = state.data ? `Results of ${tournamentName()} confirmed by:` : 'Results confirmed by:';
+  $('#so-arbiter-print').textContent = $('#so-arbiter').value.trim();
+  $('#so-organizer-print').textContent = $('#so-organizer').value.trim();
+}
+for (const id of ['#so-on', '#so-arbiter', '#so-organizer']) $(id).addEventListener('input', syncSignoff);
+syncSignoff();
 $('#excluded').addEventListener('input', (e) => { state.excludedText = e.target.value; refresh(); });
 function addPrize(type) {
   const p = newPrize(type);
