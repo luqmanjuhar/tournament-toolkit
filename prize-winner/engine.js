@@ -139,9 +139,10 @@ function runIndependent(slots, pool) {
 // passes to the next best-ranked eligible player.
 //   priority 'list'  (default): slots are filled in list order (prize order, then place).
 //   priority 'value': highest-RM slots first; ties are broken by list order.
-//   priority 'fill': cash slots (RM > 0) first in list order, then the RM0 slots, prize with
-//     the fewest still-available eligible players first (ties by list order), so that as
-//     many medal slots as possible get a winner.
+//   priority 'fill': highest value first, but prizes with the same value (including the RM0
+//     tier) are ordered by the fewest still-available eligible players, so that as many slots
+//     as possible get a winner. On an exact tie a Main prize goes before a Special prize, then
+//     list order decides.
 //   medalExclusive true (default): RM0 prizes count as prizes too.
 //   medalExclusive false: RM0 prizes never block anything and are never blocked by other
 //     prizes, so a player may take several medals, or a medal plus a cash prize.
@@ -168,19 +169,27 @@ function runExclusive(slots, pool, { priority = 'list', medalExclusive = true } 
   };
 
   if (priority === 'fill') {
-    slots.filter((x) => x.amount > 0).sort(byList).forEach(assign);
-    const medals = slots.filter((x) => !(x.amount > 0));
-    const scarcity = new Map();
-    for (const m of medals) {
-      if (scarcity.has(m.prizeIndex)) continue;
-      scarcity.set(
-        m.prizeIndex,
-        pool.filter((p) => !(medalExclusive && holders.has(p.snr)) && matchesFilter(p, m.filter)).length
-      );
+    const tiers = [...new Set(slots.map((x) => x.amount))].sort((x, y) => y - x);
+    for (const amount of tiers) {
+      const tier = slots.filter((x) => x.amount === amount);
+      const blocks = (amount > 0) || medalExclusive;
+      const scarcity = new Map();
+      for (const t of tier) {
+        if (scarcity.has(t.prizeIndex)) continue;
+        scarcity.set(
+          t.prizeIndex,
+          pool.filter((p) => !(blocks && holders.has(p.snr)) && matchesFilter(p, t.filter)).length
+        );
+      }
+      tier
+        .sort(
+          (x, y) =>
+            (x.type === 'main' ? 0 : 1) - (y.type === 'main' ? 0 : 1) ||
+            scarcity.get(x.prizeIndex) - scarcity.get(y.prizeIndex) ||
+            byList(x, y)
+        )
+        .forEach(assign);
     }
-    medals
-      .sort((x, y) => scarcity.get(x.prizeIndex) - scarcity.get(y.prizeIndex) || byList(x, y))
-      .forEach(assign);
   } else {
     [...slots]
       .sort((x, y) => (priority === 'value' ? y.amount - x.amount : 0) || byList(x, y))
