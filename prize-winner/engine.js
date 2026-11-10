@@ -139,18 +139,20 @@ function runIndependent(slots, pool) {
 // passes to the next best-ranked eligible player.
 //   priority 'list'  (default): slots are filled in list order (prize order, then place).
 //   priority 'value': highest-RM slots first; ties are broken by list order.
+//   priority 'fill': cash slots (RM > 0) first in list order, then the RM0 slots, prize with
+//     the fewest still-available eligible players first (ties by list order), so that as
+//     many medal slots as possible get a winner.
 //   medalExclusive true (default): RM0 prizes count as prizes too.
 //   medalExclusive false: RM0 prizes never block anything and are never blocked by other
 //     prizes, so a player may take several medals, or a medal plus a cash prize.
 // In every case one player can never take two places in the same prize.
 function runExclusive(slots, pool, { priority = 'list', medalExclusive = true } = {}) {
-  const order = [...slots].sort((a, b) =>
-    (priority === 'value' ? b.amount - a.amount : 0) || a.prizeIndex - b.prizeIndex || a.place - b.place
-  );
+  const byList = (x, y) => x.prizeIndex - y.prizeIndex || x.place - y.place;
   const holders = new Set(); // players holding a counted prize
   const inPrize = new Map(); // prizeIndex -> players who already took a place in that prize
   const result = new Map();
-  for (const slot of order) {
+
+  const assign = (slot) => {
     const counts = medalExclusive || slot.amount > 0;
     if (!inPrize.has(slot.prizeIndex)) inPrize.set(slot.prizeIndex, new Set());
     const taken = inPrize.get(slot.prizeIndex);
@@ -163,6 +165,26 @@ function runExclusive(slots, pool, { priority = 'list', medalExclusive = true } 
       if (counts) holders.add(winner.snr);
     }
     result.set(slot.key, winner);
+  };
+
+  if (priority === 'fill') {
+    slots.filter((x) => x.amount > 0).sort(byList).forEach(assign);
+    const medals = slots.filter((x) => !(x.amount > 0));
+    const scarcity = new Map();
+    for (const m of medals) {
+      if (scarcity.has(m.prizeIndex)) continue;
+      scarcity.set(
+        m.prizeIndex,
+        pool.filter((p) => !(medalExclusive && holders.has(p.snr)) && matchesFilter(p, m.filter)).length
+      );
+    }
+    medals
+      .sort((x, y) => scarcity.get(x.prizeIndex) - scarcity.get(y.prizeIndex) || byList(x, y))
+      .forEach(assign);
+  } else {
+    [...slots]
+      .sort((x, y) => (priority === 'value' ? y.amount - x.amount : 0) || byList(x, y))
+      .forEach(assign);
   }
   return result;
 }
@@ -183,7 +205,7 @@ function allocate(players, config, availability = null) {
   const slots = buildSlots(config.prizes);
   const single = config.mode !== 'multi';
   const naive = runIndependent(slots, pool);
-  const priority = config.priority === 'value' ? 'value' : 'list';
+  const priority = ['value', 'fill'].includes(config.priority) ? config.priority : 'list';
   const medalExclusive = config.medalExclusive !== false;
   const result = single ? runExclusive(slots, pool, { priority, medalExclusive }) : naive;
 
@@ -503,7 +525,7 @@ function parseSnrList(text) {
 function toAllocatorConfig({ mode, prizes, excludedText, priority, medalExclusive }) {
   return {
     mode: mode === 'multi' ? 'multi' : 'single',
-    priority: priority === 'value' ? 'value' : 'list',
+    priority: ['value', 'fill'].includes(priority) ? priority : 'list',
     medalExclusive: medalExclusive !== false,
     excluded: parseSnrList(excludedText),
     prizes: prizes.map((p) => ({
