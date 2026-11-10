@@ -124,6 +124,7 @@
   .chk { display: flex; gap: 8px; align-items: flex-start; font-weight: 500; }
   .chk input { margin-top: 4px; }
   .signoff { display: none; }
+  .print-only { display: none; }
   .gate { margin: 10px 0 0; font-size: 0.88rem; color: var(--warn); background: var(--warn-soft); border-radius: 8px; padding: 8px 12px; }
   .gate:empty { display: none; }
 
@@ -152,41 +153,55 @@
     .tabbar button { padding-inline: 6px; gap: 5px; font-size: 0.88rem; }
   }
   @media print {
-    @page { size: A4; margin: 14mm 12mm; }
-    :root { --bg: #fff; --surface: #fff; --surface-2: #f3f3f3; --fg: #000; --ink: #000; --muted: #444; --line: #bbb; --prize: #000; --prize-soft: #fff; --soft: #fff; --gold-text: #000; }
-    html, body { background: #fff; color: #000; }
+    @page { size: A4; margin: 12mm 12mm 14mm; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    :root { --bg: #fff; --surface: #fff; --surface-2: #fff6ee; --fg: #2e1a10; --ink: #2e1a10; --muted: #6b4a38; --line: #e8c9b0; --prize: #a53e05; --prize-soft: #ffe6d1; --soft: #ffe6d1; --gold-text: #a53e05; }
+    html, body { background: #fff; color: #2e1a10; }
     body { font-size: 10pt; padding: 0; }
     .site-header, .masthead, .tabbar, .nav-row, .btn-row, #panel-data, #panel-prizes, .site-footer,
     #copy-fallback, .msg, .no-print, .panel h2 { display: none !important; }
     #panel-winners { display: block !important; }
     .shell { max-width: none; padding: 0; }
     .panel { border: 0; padding: 0; margin: 0; background: #fff; }
-    .res-meta { display: block; margin-bottom: 4mm; padding-bottom: 3mm; border-bottom: 2px solid #000; }
-    .res-meta strong { display: block; font-size: 18pt; }
-    .res-meta span { display: block; margin-top: 1mm; }
-    .res-meta + .hint { margin: 0 0 5mm; font-size: 10pt; color: #000; }
+
+    .print-only { display: block; }
+    .print-strip { height: 4mm; background: conic-gradient(#f7781f 25%, #ffd9b8 0 50%, #f7781f 0 75%, #ffd9b8 0) 0 0 / 8mm 8mm; }
+    .print-head { display: flex; align-items: center; gap: 4mm; padding: 3mm 0; margin-bottom: 4mm; border-bottom: 3px solid #f7781f; }
+    .print-head img { height: 14mm; width: auto; }
+    .print-brand { font: 800 13pt var(--font-display); color: #c8401f; line-height: 1.1; }
+    .print-sub { font: 500 8.5pt var(--font-data); text-transform: uppercase; letter-spacing: 0.08em; color: #6b4a38; }
+
+    .res-meta { display: block; margin-bottom: 3mm; }
+    .res-meta strong { display: block; font-size: 18pt; color: #c8401f; }
+    .res-meta span { display: block; margin-top: 1mm; color: #6b4a38; }
+    .res-meta + .hint { margin: 0 0 5mm; padding-bottom: 3mm; font-size: 10pt; color: #2e1a10; border-bottom: 1px solid #e8c9b0; }
     .res-grid { display: block; }
     .res-grid > div { margin: 0 0 6mm; break-inside: avoid; page-break-inside: avoid; }
-    h3 { font-size: 12pt; margin: 0 0 2mm; }
-    .badge, .badge.main { background: none; color: #000; border: 1px solid #000; padding: 0 6px; }
+    h3 { font-size: 12pt; margin: 0 0 2mm; color: #c8401f; }
+    .badge { background: #fff; color: #c8401f; border: 1px solid #c8401f; padding: 0 6px; }
+    .badge.main { background: #f7781f; color: #fff; border-color: #f7781f; }
+
     .scroll { max-height: none; overflow: visible; border: 0; margin: 0; }
     table { width: 100%; table-layout: auto; border-collapse: collapse; font-size: 10pt; }
-    th, td { white-space: normal; padding: 3px 6px; border-bottom: 1px solid #999; text-align: left; }
-    th { position: static; background: #eee; border-top: 1px solid #000; border-bottom: 1px solid #000; }
+    th, td { white-space: normal; padding: 3px 6px; border-bottom: 1px solid #f0d5bf; text-align: left; }
+    th { position: static; background: #ffe6d1; color: #7a2d10; border-top: 2px solid #f7781f; border-bottom: 2px solid #f7781f; }
+    tbody tr:nth-child(even) td { background: #fff8f2; }
     th.num, td.num { text-align: right; white-space: nowrap; }
-    td.amt { color: #000; }
+    td.amt { color: #a53e05; font-weight: 600; }
+    tr.vacant td { color: #6b4a38; }
     tr { break-inside: avoid; page-break-inside: avoid; }
     thead { display: table-header-group; }
-    .notice { background: none; border: 1px solid #999; color: #000; font-size: 9pt; margin: 0 0 5mm; }
-    .total { border-top: 2px solid #000; margin-top: 2mm; padding-top: 3mm; break-inside: avoid; }
-    .total .num { color: #000; font-size: 14pt; }
+    .notice { background: #fff6ee; border: 1px solid #f0d5bf; border-left: 4px solid #f7781f; color: #2e1a10; font-size: 9pt; margin: 0 0 5mm; }
+    .total { border-top: 3px solid #f7781f; margin-top: 2mm; padding-top: 3mm; break-inside: avoid; }
+    .total .num { color: #c8401f; font-size: 14pt; }
+
     .signoff.on { display: block; margin-top: 14mm; break-inside: avoid; page-break-inside: avoid; }
-    .signoff-note { margin: 0 0 12mm; font-weight: 600; }
+    .signoff-note { margin: 0 0 12mm; font-weight: 600; color: #c8401f; }
     .signoff-row { display: flex; gap: 20mm; }
     .signoff-box { flex: 1; }
-    .signoff-line { border-bottom: 1px solid #000; height: 18mm; }
-    .signoff-role { font-weight: 700; margin-top: 2mm; }
-    .signoff-field { margin-top: 3mm; min-height: 6mm; border-bottom: 1px dotted #777; }
+    .signoff-line { border-bottom: 1.5px solid #c8401f; height: 18mm; }
+    .signoff-role { font-weight: 700; margin-top: 2mm; color: #c8401f; }
+    .signoff-field { margin-top: 3mm; min-height: 6mm; border-bottom: 1px dotted #c9a58c; }
   }
   @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 </style>
@@ -301,6 +316,13 @@
   <section id="panel-winners" role="tabpanel" aria-labelledby="tab-winners" hidden>
     <div class="panel">
       <h2>Winners</h2>
+      <div class="print-only">
+        <div class="print-strip"></div>
+        <div class="print-head">
+          <img src="../assets/kamus-catur-logo.png" alt="">
+          <div><div class="print-brand">Tournament Toolkit</div><div class="print-sub">Prize Winner List</div></div>
+        </div>
+      </div>
       <div id="result"></div>
       <div class="signoff" id="signoff" aria-hidden="true">
         <p class="signoff-note" id="so-note">Results confirmed by:</p>
