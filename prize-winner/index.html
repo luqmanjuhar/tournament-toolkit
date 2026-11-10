@@ -233,6 +233,8 @@
           <span>List order. <span class="hint">Slots are filled in the order of the prize list (prize, then place). Put Main prizes at the top.</span></span></label>
         <label for="prio-value"><input type="radio" name="priority" id="prio-value" value="value">
           <span>Highest value first. <span class="hint">The biggest RM slots are filled first; equal values follow list order.</span></span></label>
+        <label for="prio-fill"><input type="radio" name="priority" id="prio-fill" value="fill">
+          <span>Fill every slot. <span class="hint">Cash prizes first in list order, then medal-only (RM0) prizes, the one with the fewest eligible players first, so as many medal slots as possible get a winner.</span></span></label>
         <label for="medal-excl"><input type="checkbox" id="medal-excl" checked>
           <span>RM0 prizes (medal or trophy only) also count as a prize. <span class="hint">Untick to let a player take several medals, or a medal plus a cash prize.</span></span></label>
       </fieldset>
@@ -493,6 +495,7 @@ function renderPrizes() {
   $('#mode-multi').checked = state.mode === 'multi';
   $('#prio-list').checked = state.priority === 'list';
   $('#prio-value').checked = state.priority === 'value';
+  $('#prio-fill').checked = state.priority === 'fill';
   $('#medal-excl').checked = state.medalExclusive;
   for (const el of document.querySelectorAll('#one-prize-opts input')) el.disabled = state.mode === 'multi';
   $('#excluded').value = state.excludedText;
@@ -573,7 +576,7 @@ function renderResult() {
 
   box.innerHTML = `
     <div class="res-meta"><strong>${esc(tournamentName())}</strong>
-      <span>${res.mode === 'single' ? `One prize per player · ${res.priority === 'value' ? 'highest value first' : 'list order'}${res.medalExclusive ? '' : ' · RM0 prizes do not block'}` : 'Players can win more than one'}</span></div>
+      <span>${res.mode === 'single' ? `One prize per player · ${{ value: 'highest value first', fill: 'fill every slot' }[res.priority] || 'list order'}${res.medalExclusive ? '' : ' · RM0 prizes do not block'}` : 'Players can win more than one'}</span></div>
     <p class="hint">${esc(infoLine())}</p>
     ${list(res.warnings, 'warn')}<div class="res-grid">${blocks}</div>
     <div class="total"><span>Total prizes · ${winnerCount} winners</span><span class="num">${money(res.totalAmount)}</span></div>
@@ -790,7 +793,7 @@ function downloadXlsx() {
     ['Venue', state.info.venue.trim()],
     ['Organizer', state.info.organizer.trim()],
     ['Mode', lastResult.mode === 'single' ? 'One prize per player' : 'Players can win more than one'],
-    ['Priority', lastResult.mode === 'single' ? (lastResult.priority === 'value' ? 'Highest value first' : 'List order') : ''],
+    ['Priority', lastResult.mode === 'single' ? ({ value: 'Highest value first', fill: 'Fill every slot' }[lastResult.priority] || 'List order') : ''],
     ['RM0 prizes count as a prize', lastResult.mode === 'single' ? (lastResult.medalExclusive ? 'Yes' : 'No') : ''],
     ['Winners', winners],
     ['Total prizes (RM)', lastResult.totalAmount],

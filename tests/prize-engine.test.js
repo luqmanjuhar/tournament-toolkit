@@ -170,3 +170,57 @@ test('rows with a non-numeric Rk. and duplicate SNo are ignored', () => {
   assert.equal(r.players.length, 1);
   assert.ok(r.warnings.some((w) => /more than once/.test(w)));
 });
+
+// ---- fill every slot -----------------------------------------------------
+function realCase() {
+  const t = [
+    'Rk.\tSNo\tName\tTyp\tClub/City',
+    '1\t5\tA\tU18\tFOON YEW', '2\t3\tB\t\tPAWNTIAN', '3\t4\tC\tU18\tPONTIAN', '4\t1\tD\t\t',
+    '5\t7\tE\t\t', '6\t12\tSolaahuddin\tU18\tKCHERS', '7\t9\tG\tU18\t', '8\t8\tH\t\t',
+    '9\t2\tI\t\tKCHERS', '10\t6\tJ\t\t', '11\t10\tK\tU18\tSMKLL', '12\t11\tL\tU18\tSMKLL',
+  ].join('\n');
+  return E.parseRankingText(t).players;
+}
+const cash5 = prize('Champion-5th', 'main', {}, [130, 80, 60, 40, 30]);
+const medalU18 = prize('Best U18', 'special', { type: ['U18'] }, [0, 0]);
+const medalK = prize('Best KChers', 'special', { club: ['KCHERS'] }, [0, 0]);
+
+test('fill: Best U18 listed above Best KChers still fills every medal slot', () => {
+  const list = run(realCase(), [cash5, medalU18, medalK], { priority: 'list' });
+  assert.deepEqual(winnersOf(list, 'Best KChers'), [9, null]); // list order leaves a slot empty
+  const fill = run(realCase(), [cash5, medalU18, medalK], { priority: 'fill' });
+  assert.equal(fill.priority, 'fill');
+  assert.deepEqual(winnersOf(fill, 'Best KChers'), [6, 9]);
+  assert.deepEqual(winnersOf(fill, 'Best U18'), [7, 11]);
+  assert.equal(fill.awards.filter((a) => !a.player).length, 0);
+});
+
+test('fill: result does not depend on the list order of the medal prizes', () => {
+  const a = run(realCase(), [cash5, medalU18, medalK], { priority: 'fill' });
+  const b = run(realCase(), [cash5, medalK, medalU18], { priority: 'fill' });
+  assert.deepEqual(winnersOf(a, 'Best KChers'), winnersOf(b, 'Best KChers'));
+  assert.deepEqual(winnersOf(a, 'Best U18'), winnersOf(b, 'Best U18'));
+});
+
+test('fill: cash prizes are filled first even when listed below a medal prize', () => {
+  const cashLater = prize('Cash U18', 'special', { type: ['U18'] }, [50]);
+  const res = run(realCase(), [medalU18, cashLater], { priority: 'fill' });
+  assert.equal(winnersOf(res, 'Cash U18')[0], 1); // best-ranked U18 takes the cash
+  assert.deepEqual(winnersOf(res, 'Best U18'), [3, 6]); // medals go to the next U18 players
+});
+
+test('fill: equal scarcity falls back to list order', () => {
+  const prizes = [prize('A', 'special', { type: ['U10'] }, [0]), prize('B', 'special', { type: ['U10'] }, [0])];
+  const res = run(mini(), prizes, { priority: 'fill' });
+  assert.deepEqual([winnersOf(res, 'A')[0], winnersOf(res, 'B')[0]], [1, 2]);
+});
+
+test('fill with medalExclusive false: medals do not block each other', () => {
+  const res = run(realCase(), [cash5, medalU18, medalK], { priority: 'fill', medalExclusive: false });
+  assert.deepEqual(winnersOf(res, 'Best KChers'), [6, 9]);
+  assert.deepEqual(winnersOf(res, 'Best U18'), [1, 3]);
+});
+
+test('toAllocatorConfig keeps the fill priority', () => {
+  assert.equal(E.toAllocatorConfig({ mode: 'single', prizes: [], excludedText: '', priority: 'fill' }).priority, 'fill');
+});
