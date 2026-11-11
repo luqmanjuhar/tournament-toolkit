@@ -4,9 +4,17 @@ Tournament Toolkit is a growing collection of browser-based utilities for chess 
 
 ## Projects
 
-### 1. Swiss Manager Project — Individual Event Export
+### 1. Swiss Manager Project
 
-Open the Swiss Manager Project at `/swiss-manager/` to turn any registration or participant listing into a Swiss Manager-compatible workbook.
+Open the Swiss Manager Project at `/swiss-manager/` and choose the tournament type. Each type has its own Excel layout for the participant database, so each has its own converter:
+
+1. **Swiss Manager Individual Event** (available, `/swiss-manager/individual/`).
+2. **Swiss Manager Team Tiebreak** (coming soon).
+3. **Swiss Manager Team** (coming soon).
+
+#### Individual Event Export
+
+Turn any registration or participant listing into a Swiss Manager-compatible workbook.
 
 - **Input:** upload an XLSX, XLS or CSV file, or paste a table copied from Excel, Google Sheets or a web page (tab, comma or semicolon separated, with the header row). Nothing is uploaded to a server.
 - **Mapping:** columns are matched automatically from common header names in English and Malay (for example Attendee Name, Participant, Gender / Jantina, Category → Gr, School → Club, FIDE ID, Date of Birth, IC Number) and can be changed in the mapping table. Columns you do not map (such as Nationality or payment status) are simply ignored.
@@ -48,7 +56,8 @@ node --test
 ```text
 /
 ├── index.html                  # Toolkit dashboard
-├── swiss-manager/index.html    # Swiss Manager converter
+├── swiss-manager/index.html    # Swiss Manager options (individual, team tiebreak, team)
+├── swiss-manager/individual/index.html  # Swiss Manager individual event converter
 ├── prize-winner/index.html     # Prize Winner List (UI)
 ├── result-slips/index.html     # Result Slips (UI)
 ├── result-slips/slips.js       # Pairing parser (tested)
