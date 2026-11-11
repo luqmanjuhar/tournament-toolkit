@@ -96,7 +96,8 @@ function readSheet(){
  if(!state.wb)return;const aoa=XLSX.utils.sheet_to_json(state.wb.Sheets[state.wb.SheetNames[+$("sheet").value]],{header:1,defval:"",raw:false});const hi=+$("headerRow").value;state.headers=(aoa[hi]||[]).map(v=>String(v??""));state.rows=aoa.slice(hi+1).filter(r=>r.some(v=>String(v??"").trim()!==""));renderMapping();
  const date=$("registrationDate");makeOptions(date,state.headers,true);date.options[0].textContent="— Select registration date column —";let pref=state.headers.findIndex(h=>["registration date","registered date","date registered","registration timestamp","registered at","created at","date of registration","registered on","tarikh daftar","tarikh pendaftaran"].includes(norm(h)));date.value=String(pref);
  const icSel=$("icColumn");makeOptions(icSel,state.headers,true);icSel.options[0].textContent="— None (use the Birth and Sex columns) —";icSel.value=String(state.headers.findIndex(h=>IC_NAMES.includes(norm(h))));
- if((state.map.Gr??-1)>=0)document.querySelector('input[name="grMode"][value="listing"]').checked=true;syncRules();
+ if((state.map.Gr??-1)>=0)document.querySelector('input[name="grMode"][value="listing"]').checked=true;
+ document.querySelector('input[name="birthMode"][value="'+((state.map.Birth??-1)>=0?"listing":"ic")+'"]').checked=true;syncRules();
  ["mappingPanel","rulesPanel","validationPanel"].forEach(id=>$(id).classList.remove("hidden"));validate();
 }
 $("file").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{if(!window.XLSX)throw new Error("Spreadsheet library unavailable. Check your internet connection and refresh.");let wb;
@@ -119,6 +120,7 @@ function validate(){
   else{r.Birth="";issues.push({row:line,severity:"ERROR",message:"Birth: "+d.error})}}
  else{const d=parseDate(r.Birth);if(r.Birth&&!d)issues.push({row:line,severity:"ERROR",message:"Birth date invalid; use DD/MM/YYYY, YYYY-MM-DD or 7 Nov 2026"});else if(d){bd=d;r.Birth=fmtDate(d)}}
  if(bd&&bd.getTime()>Date.now())issues.push({row:line,severity:"WARNING",message:"Birth date "+fmtDate(bd)+" is in the future"});
+ else if(bd){const rd=dateIdx>=0?parseDate(row[dateIdx]):null;if(rd&&bd.getTime()>=rd.getTime())issues.push({row:line,severity:"WARNING",message:"Birth date "+fmtDate(bd)+" is on or after the registration date; check the date of birth"})}
  if(checked("sexMode")==="ic"){const d=icInfo(ic),listed=sexValue(r.Sex);
   if(!d.error){r.Sex=d.sex;if(listed!==null&&listed!==d.sex)issues.push({row:line,severity:"WARNING",message:"Sex from IC differs from the Sex column"})}
   else if(listed!==null){r.Sex=listed;issues.push({row:line,severity:"WARNING",message:"Sex taken from the Sex column ("+d.error+")"})}
