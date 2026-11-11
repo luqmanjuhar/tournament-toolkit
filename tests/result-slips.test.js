@@ -100,3 +100,25 @@ test('formatSlipDate gives the slip style date', () => {
   assert.equal(S.formatSlipDate('2026-01-05'), '5 JANUARY 2026');
   assert.equal(S.formatSlipDate(''), '');
 });
+
+test('real Chess-Results paste: White / Black headers, ½ scores, results and a last-board bye', () => {
+  const text = [
+    ['Bo.', 'White', 'Typ', 'Rtg', 'Pts.', 'Result', 'Pts.', 'Black', 'Typ', 'Rtg'],
+    ['1', 'ELOYSIUS SHU JUN HAO', 'U18', '1488', '3½', '1 - 0', '3', 'MD MONIR HOSSAIN', '', '1873'],
+    ['2', 'SHAHRULNIZAM MOHD SHOHOD', '', '1626', '2½', '1 - 0', '3½', 'KOH WEI JIE', 'U18', '1502'],
+    ['3', 'BRYAN LOH', 'U18', '0', '2½', '0 - 1', '2', 'AFNAN HILMI BIN ISHAK', '', '0'],
+    ['4', 'SAIFUL ISLAM PUAL BIN ABDULLAH', '', '1769', '1', '½ - ½', '2', 'MUHAMMAD SOLAAHUDDIN SAHRIL BIN ABDUL H', 'U18', '0'],
+    ['5', 'MUHAMMAD FIRAS ADAM BIN MOHD RIZUAN', 'U18', '0', '1', '0 - 1', '1½', 'AYSH AZFAR BIN MD HAIROL', '', '0'],
+    ['6', 'MUHAMMAD IRFAN AQIL BIN ZULKIFLI'],
+  ].map((r) => r.join('\t')).join('\n');
+  const r = S.parsePairings(text);
+  assert.deepEqual(r.slips.map((s) => [s.table, s.white, s.black]), [
+    ['1', 'ELOYSIUS SHU JUN HAO', 'MD MONIR HOSSAIN'],
+    ['2', 'SHAHRULNIZAM MOHD SHOHOD', 'KOH WEI JIE'],
+    ['3', 'BRYAN LOH', 'AFNAN HILMI BIN ISHAK'],
+    ['4', 'SAIFUL ISLAM PUAL BIN ABDULLAH', 'MUHAMMAD SOLAAHUDDIN SAHRIL BIN ABDUL H'],
+    ['5', 'MUHAMMAD FIRAS ADAM BIN MOHD RIZUAN', 'AYSH AZFAR BIN MD HAIROL'],
+  ]);
+  assert.deepEqual(r.byes, [{ table: '6', name: 'MUHAMMAD IRFAN AQIL BIN ZULKIFLI' }]);
+});
+
