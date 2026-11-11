@@ -44,34 +44,34 @@
   .sheet { width: 198mm; margin: 0 auto 10px; background: #fff; display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 35.4mm; color: #000; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2); }
   .cell { padding: 0.8mm; border-right: 0.3mm dashed #777; border-bottom: 0.3mm dashed #777; overflow: hidden; }
   .cell:nth-child(2n) { border-right: 0; }
-  .slip { height: 100%; border: 0.35mm solid #000; display: grid; grid-template-rows: 5.4mm 5.4mm 1fr; font: 600 7.5pt/1.1 Arial, Helvetica, sans-serif; background: #fff; color: #000; }
-  .slip > div { min-height: 0; }
-  .slip .c { display: flex; align-items: center; justify-content: center; text-align: center; border-right: 0.3mm solid #000; padding: 0 0.6mm; overflow: hidden; }
-  .slip .c:last-child { border-right: 0; }
-  .r1, .r2 { display: grid; border-bottom: 0.3mm solid #000; }
-  .r1 { grid-template-columns: 10mm 1fr 41mm; }
-  .r2 { grid-template-columns: 12mm 1fr 10mm 8mm 9mm 8mm 18mm 1fr; }
-  .r2 .c { white-space: nowrap; font-size: 7pt; }
-  .r2 .fill { font-size: 8pt; }
+  /* One grid for the whole slip, so every vertical and horizontal line sits on a shared track.
+     Columns: I | W | White name | Result | I | W | Black name.  Rows: event, details, headings, 3 body rows. */
+  .slip {
+    height: 100%; border: 2px solid #000; background: #fff; color: #000;
+    font: 600 7.2pt/1.1 Arial, Helvetica, sans-serif;
+    display: grid;
+    grid-template-columns: 5.5mm 5.5mm 1fr 15mm 5.5mm 5.5mm 1fr;
+    grid-template-rows: 5.4mm 5.4mm 4.4mm repeat(3, 1fr);
+  }
+  .slip > div { border-right: 1px solid #000; border-bottom: 1px solid #000; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; padding: 0 0.6mm; min-width: 0; min-height: 0; }
+  .slip > .er { border-right: 0; }
+  .slip > .eb { border-bottom: 0; }
   .accent { color: var(--slip-accent, #e01414); font-weight: 800; }
-  .ev { font-size: 7.6pt; letter-spacing: 0.01em; }
-  .dt { justify-content: flex-start; padding-left: 1.4mm; gap: 1mm; font-size: 7pt; white-space: nowrap; }
   .ev { line-height: 1.05; }
+  .dt { justify-content: flex-start; gap: 1mm; padding-left: 1.4mm; font-size: 7pt; white-space: nowrap; }
+  .lab { font-size: 6.6pt; white-space: nowrap; }
   .fill { font-size: 8pt; font-weight: 700; }
-  .main { display: grid; grid-template-columns: 11mm 1fr 15mm 11mm 1fr; min-height: 0; }
-  .iw { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 4.4mm repeat(3, 1fr); border-right: 0.3mm solid #000; }
-  .iw div { border-right: 0.3mm solid #000; border-bottom: 0.3mm solid #000; display: flex; align-items: center; justify-content: center; }
-  .iw div:nth-child(2n) { border-right: 0; }
-  .iw div:nth-last-child(-n+2) { border-bottom: 0; }
-  .iw .h { font-size: 7pt; }
-  .pl { display: grid; grid-template-rows: 4.4mm 1fr 5.6mm; border-right: 0.3mm solid #000; min-height: 0; }
-  .pl .h { display: flex; align-items: center; justify-content: center; border-bottom: 0.3mm solid #000; font-size: 7pt; }
-  .pl .nm { padding: 0.8mm 1.2mm; font-size: 7.6pt; line-height: 1.15; overflow: hidden; word-break: break-word; display: flex; align-items: center; }
-  .pl .sg { border-top: 0.3mm solid #000; padding: 0 1.2mm; display: flex; align-items: center; font-size: 7pt; }
-  .rs { display: grid; grid-template-rows: 4.4mm 1fr; border-right: 0.3mm solid #000; }
-  .rs .h { display: flex; align-items: center; justify-content: center; border-bottom: 0.3mm solid #000; font-size: 7pt; }
-  .main > :last-child { border-right: 0; }
-  .key { font-size: 5.6pt; font-weight: 400; color: #333; }
+  .h { font-size: 7pt; }
+  .slip > .nm { justify-content: flex-start; text-align: left; padding: 0.8mm 1.4mm; font-size: 7.6pt; line-height: 1.15; word-break: break-word; }
+  .slip > .sg { justify-content: flex-start; padding: 0 1.4mm; font-size: 7pt; }
+  /* a cell holding two or three sub-cells separated by the same thin line */
+  .slip > .sp { padding: 0; align-items: stretch; justify-content: stretch; }
+  .sp > span { display: flex; align-items: center; justify-content: center; padding: 0 0.8mm; border-right: 1px solid #000; white-space: nowrap; }
+  .sp > span:last-child { border-right: 0; }
+  .sp .grow { flex: 1; min-width: 0; }
+  .sp .fix { font-size: 8pt; font-weight: 700; }
+  .sp .l { font-size: 7pt; }
+  .sp .l.sm { font-size: 6.2pt; }
 
   @media (max-width: 560px) { h1 { font-size: 1.6rem; } }
 
@@ -162,23 +162,40 @@ function updateGate() {
   $('#btn-print').disabled = !ok || !state.slips.length;
 }
 
-const iw = () => '<div class="iw"><div class="h">I</div><div class="h">W</div><div></div><div></div><div></div><div></div><div></div><div></div></div>';
-
 // The event name shrinks (down to a floor, then wraps) so it fits the title cell.
-const evSize = (name) => Math.max(5.4, Math.min(7.6, (7.6 * 24) / Math.max(name.length, 1))).toFixed(1);
+const evSize = (name) => Math.max(5, Math.min(7.6, (7.6 * 22) / Math.max(name.length, 1))).toFixed(1);
+
+// Grid placement: [column start, column end, row start, row end]
+const at = (c1, c2, r1, r2, extra = '') => `style="grid-column:${c1}/${c2};grid-row:${r1}/${r2};${extra}"`;
+// Long player names get a smaller font so they stay inside their two-row cell.
+const nameSize = (n) => (n.length > 34 ? 6.1 : n.length > 24 ? 6.8 : 7.6);
+const ticks = (c) => [4, 5, 6].map((r) => `<div ${at(c, c + 1, r, r + 1)} class="${r === 6 ? 'eb' : ''}"></div>`).join('');
 
 function slipHtml(s) {
   const cat = state.category.trim();
+  const ev = state.event.trim();
   return `<div class="cell"><div class="slip">
-    <div class="r1"><div class="c">Event</div><div class="c accent ev" style="font-size:${evSize(state.event.trim())}pt">${esc(state.event.trim())}</div><div class="c dt">Date :<span class="accent">${esc(formatSlipDate(state.date))}</span></div></div>
-    <div class="r2"><div class="c">Category</div><div class="c fill">${esc(cat)}</div><div class="c">Round</div><div class="c fill">${esc(state.round.trim())}</div><div class="c">Table</div><div class="c fill">${esc(s.table)}</div><div class="c">Arbiter Sign</div><div class="c"></div></div>
-    <div class="main">
-      ${iw()}
-      <div class="pl"><div class="h">Name White</div><div class="nm">${esc(s.white)}</div><div class="sg">Sign :</div></div>
-      <div class="rs"><div class="h">Result</div><div></div></div>
-      ${iw()}
-      <div class="pl"><div class="h">Name Black</div><div class="nm">${esc(s.black)}</div><div class="sg">Sign :</div></div>
-    </div>
+    <div ${at(1, 3, 1, 2)} class="lab">Event</div>
+    <div class="accent ev" style="grid-column:3/5;grid-row:1/2;font-size:${evSize(ev)}pt">${esc(ev)}</div>
+    <div ${at(5, 8, 1, 2)} class="dt er">Date :<span class="accent">${esc(formatSlipDate(state.date))}</span></div>
+
+    <div ${at(1, 3, 2, 3)} class="lab">Category</div>
+    <div ${at(3, 4, 2, 3)} class="fill">${esc(cat)}</div>
+    <div ${at(4, 5, 2, 3)} class="sp"><span class="l">Round</span><span class="fix grow">${esc(state.round.trim())}</span></div>
+    <div ${at(5, 7, 2, 3)} class="lab">Table</div>
+    <div ${at(7, 8, 2, 3)} class="sp er"><span class="fix" style="min-width:6mm">${esc(s.table)}</span><span class="l sm">Arbiter Sign</span><span class="grow"></span></div>
+
+    <div ${at(1, 2, 3, 4)} class="h">I</div><div ${at(2, 3, 3, 4)} class="h">W</div>
+    <div ${at(3, 4, 3, 4)} class="h">Name White</div><div ${at(4, 5, 3, 4)} class="h">Result</div>
+    <div ${at(5, 6, 3, 4)} class="h">I</div><div ${at(6, 7, 3, 4)} class="h">W</div>
+    <div ${at(7, 8, 3, 4)} class="h er">Name Black</div>
+
+    ${ticks(1)}${ticks(2)}${ticks(5)}${ticks(6)}
+    <div ${at(3, 4, 4, 6, `font-size:${nameSize(s.white)}pt`)} class="nm">${esc(s.white)}</div>
+    <div ${at(3, 4, 6, 7)} class="sg eb">Sign :</div>
+    <div ${at(4, 5, 4, 7)} class="eb"></div>
+    <div ${at(7, 8, 4, 6, `font-size:${nameSize(s.black)}pt`)} class="nm er">${esc(s.black)}</div>
+    <div ${at(7, 8, 6, 7)} class="sg er eb">Sign :</div>
   </div></div>`;
 }
 
