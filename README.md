@@ -22,12 +22,21 @@ Open Prize Winner List at `/prize-winner/` to find Main and Special prize winner
 
 **Important:** Prize allocation is a draft. Review the rules and winner list before publishing.
 
+### 3. Result Slips
+
+Open Result Slips at `/result-slips/` to print match result slips, 16 per A4 page (2 by 8) with dashed cut lines.
+
+- **Event details:** event name, date and round are required; category is optional. The event name and date print in red (or orange or black).
+- **Pairings:** paste the round's pairing table copied from Chess-Results or Swiss Manager (or upload XLSX/CSV). The first `Name` column is White, the second is Black, and the `Bo.` / Board / Table column gives the table number (otherwise tables are numbered in order). A table with `White` and `Black` columns, or plain `table, white, black` lines, also works. Byes are skipped.
+- **Each slip:** event, date, category, round, table, arbiter signature, White and Black names with a signature line each, a result box, and tick squares for **I** (illegal move) and **W** (warning), three per player.
+- **Output:** a live preview and Print / Save as PDF. A blank sheet can be printed for hand-written slips.
+
 ## Tests
 
-The allocation engine lives in `prize-winner/engine.js` and is covered by unit tests that need no dependencies (Node 18+):
+The prize allocation engine (`prize-winner/engine.js`) and the pairing parser (`result-slips/slips.js`) are covered by unit tests that need no dependencies (Node 18+):
 
 ```bash
-node --test tests/prize-engine.test.js
+node --test
 ```
 
 ## Repository layout
@@ -37,6 +46,8 @@ node --test tests/prize-engine.test.js
 ├── index.html                  # Toolkit dashboard
 ├── swiss-manager/index.html    # Swiss Manager converter
 ├── prize-winner/index.html     # Prize Winner List (UI)
+├── result-slips/index.html     # Result Slips (UI)
+├── result-slips/slips.js       # Pairing parser (tested)
 ├── prize-winner/engine.js      # Prize allocation engine (tested)
 ├── tests/                      # Unit tests
 └── README.md

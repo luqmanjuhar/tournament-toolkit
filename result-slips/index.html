@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Result Slips · Tournament Toolkit</title>
+<meta name="description" content="Paste the pairing list and print result slips, 16 per A4 page, with names, table number and round filled in.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../theme.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  main { max-width: 1100px; margin: 24px auto 60px; padding: 0 16px; }
+  h1 { font-size: 1.9rem; font-weight: 800; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .lead { color: var(--muted); margin: 0 0 18px; max-width: 70ch; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .panel h2 { margin: 0 0 12px; font-size: 1.05rem; font-weight: 800; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .grid .wide { grid-column: 1 / -1; }
+  .lbl { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px; }
+  .req { color: var(--danger); }
+  input[type="text"], input[type="date"], input[type="number"], select, textarea {
+    width: 100%; font: inherit; color: var(--fg); background: var(--bg); border: 1.5px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--board); box-shadow: 0 0 0 3px var(--soft); }
+  textarea { font: 0.82rem/1.4 var(--font-data); min-height: 150px; resize: vertical; }
+  button { font: 600 0.9rem var(--font-body); color: var(--fg); background: var(--surface); border: 1.5px solid var(--line); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  button:hover { border-color: var(--board); }
+  button.primary { background: var(--board-deep); border-color: var(--board-deep); color: var(--on-board); }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .hint { color: var(--muted); font-size: 0.85rem; margin: 8px 0 0; }
+  .gate { margin: 0 0 12px; font-size: 0.88rem; color: var(--warn); background: var(--warn-soft); border-radius: 8px; padding: 8px 12px; }
+  .gate:empty { display: none; }
+  .msg { margin: 10px 0 0; font-size: 0.9rem; }
+  .msg.error { color: var(--danger); background: var(--danger-soft); padding: 8px 12px; border-radius: 8px; }
+  .msg.ok { color: var(--ok); }
+  .notice { background: var(--warn-soft); color: var(--warn); border-radius: 8px; padding: 8px 12px; margin-top: 10px; font-size: 0.88rem; }
+  .stats { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0 0 12px; font-size: 0.9rem; color: var(--muted); }
+  .stats b { color: var(--fg); font-family: var(--font-data); font-weight: 500; }
+  .preview { overflow-x: auto; background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .site-footer { margin-top: 28px; }
+
+  /* ---------- the slips (sizes in mm so the printout is exact) ---------- */
+  .sheet { width: 198mm; margin: 0 auto 10px; background: #fff; display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 35.4mm; color: #000; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2); }
+  .cell { padding: 0.8mm; border-right: 0.3mm dashed #777; border-bottom: 0.3mm dashed #777; overflow: hidden; }
+  .cell:nth-child(2n) { border-right: 0; }
+  .slip { height: 100%; border: 0.35mm solid #000; display: grid; grid-template-rows: 5.4mm 5.4mm 1fr; font: 600 7.5pt/1.1 Arial, Helvetica, sans-serif; background: #fff; color: #000; }
+  .slip > div { min-height: 0; }
+  .slip .c { display: flex; align-items: center; justify-content: center; text-align: center; border-right: 0.3mm solid #000; padding: 0 0.6mm; overflow: hidden; }
+  .slip .c:last-child { border-right: 0; }
+  .r1, .r2 { display: grid; border-bottom: 0.3mm solid #000; }
+  .r1 { grid-template-columns: 10mm 1fr 41mm; }
+  .r2 { grid-template-columns: 12mm 1fr 10mm 8mm 9mm 8mm 18mm 1fr; }
+  .r2 .c { white-space: nowrap; font-size: 7pt; }
+  .r2 .fill { font-size: 8pt; }
+  .accent { color: var(--slip-accent, #e01414); font-weight: 800; }
+  .ev { font-size: 7.6pt; letter-spacing: 0.01em; }
+  .dt { justify-content: flex-start; padding-left: 1.4mm; gap: 1mm; font-size: 7pt; white-space: nowrap; }
+  .ev { line-height: 1.05; }
+  .fill { font-size: 8pt; font-weight: 700; }
+  .main { display: grid; grid-template-columns: 11mm 1fr 15mm 11mm 1fr; min-height: 0; }
+  .iw { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 4.4mm repeat(3, 1fr); border-right: 0.3mm solid #000; }
+  .iw div { border-right: 0.3mm solid #000; border-bottom: 0.3mm solid #000; display: flex; align-items: center; justify-content: center; }
+  .iw div:nth-child(2n) { border-right: 0; }
+  .iw div:nth-last-child(-n+2) { border-bottom: 0; }
+  .iw .h { font-size: 7pt; }
+  .pl { display: grid; grid-template-rows: 4.4mm 1fr 5.6mm; border-right: 0.3mm solid #000; min-height: 0; }
+  .pl .h { display: flex; align-items: center; justify-content: center; border-bottom: 0.3mm solid #000; font-size: 7pt; }
+  .pl .nm { padding: 0.8mm 1.2mm; font-size: 7.6pt; line-height: 1.15; overflow: hidden; word-break: break-word; display: flex; align-items: center; }
+  .pl .sg { border-top: 0.3mm solid #000; padding: 0 1.2mm; display: flex; align-items: center; font-size: 7pt; }
+  .rs { display: grid; grid-template-rows: 4.4mm 1fr; border-right: 0.3mm solid #000; }
+  .rs .h { display: flex; align-items: center; justify-content: center; border-bottom: 0.3mm solid #000; font-size: 7pt; }
+  .main > :last-child { border-right: 0; }
+  .key { font-size: 5.6pt; font-weight: 400; color: #333; }
+
+  @media (max-width: 560px) { h1 { font-size: 1.6rem; } }
+
+  @media print {
+    @page { size: A4; margin: 6mm; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    html, body { background: #fff; }
+    .site-header, .site-footer, .no-print { display: none !important; }
+    main { margin: 0; padding: 0; max-width: none; }
+    .preview { border: 0; padding: 0; background: #fff; overflow: visible; }
+    .sheet { margin: 0; box-shadow: none; width: 198mm; break-after: page; page-break-after: always; }
+    .sheet:last-child { break-after: auto; page-break-after: auto; }
+  }
+</style>
+</head>
+<body>
+<header class="site-header"><img class="logo" src="../assets/kamus-catur-logo.png" alt="Kamus Catur"><div><div class="brand">Tournament Toolkit</div><div class="sub">Result Slips</div></div><a class="back" href="../">← All tools</a></header>
+<main>
+  <div class="no-print">
+    <h1>Result Slips</h1>
+    <p class="lead">Fill in the event details, paste the round's pairing list, and the slips are generated automatically with each board's table number, round and player names. Print 16 slips per A4 page and cut along the dashed lines.</p>
+
+    <section class="panel">
+      <h2>1. Event details</h2>
+      <div class="grid">
+        <div class="wide"><label class="lbl" for="f-event">Event name <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" id="f-event" data-f="event" autocomplete="off" placeholder="e.g. MALAYSIA DAY CUP CHESS TOURNAMENT"></div>
+        <div><label class="lbl" for="f-date">Date <span class="req" aria-hidden="true">*</span></label>
+          <input type="date" id="f-date" data-f="date"></div>
+        <div><label class="lbl" for="f-round">Round <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" id="f-round" data-f="round" autocomplete="off" inputmode="numeric" placeholder="e.g. 3"></div>
+        <div><label class="lbl" for="f-category">Category (optional)</label>
+          <input type="text" id="f-category" data-f="category" autocomplete="off" placeholder="e.g. U12"></div>
+        <div><label class="lbl" for="f-color">Event name and date colour</label>
+          <select id="f-color"><option value="#e01414">Red</option><option value="#c8401f">Orange</option><option value="#000000">Black</option></select></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>2. Pairing list</h2>
+      <p class="gate" id="gate" role="status"></p>
+      <label class="lbl" for="paste">Paste the pairing table (copied from Chess-Results or Swiss Manager)</label>
+      <textarea id="paste" spellcheck="false" placeholder="Bo.&#9;No.&#9;Name&#9;Rtg&#9;Pts.&#9;Result&#9;Pts.&#9;Name&#9;Rtg&#9;No.&#10;1&#9;5&#9;ALI BIN ABU&#9;1500&#9;2&#9;&#9;2&#9;SITI BINTI HASSAN&#9;0&#9;3"></textarea>
+      <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden>
+      <div class="btn-row">
+        <button type="button" id="btn-upload">Upload Excel / CSV file</button>
+        <button type="button" id="btn-blank">Blank sheet (no names)</button>
+        <button type="button" id="btn-sample">Use sample pairings</button>
+      </div>
+      <p class="msg" id="msg" role="status" aria-live="polite"></p>
+      <div id="warns"></div>
+      <p class="hint">The first <b>Name</b> column is White and the second is Black. The <b>Bo.</b> / Board / Table column gives the table number; without one, tables are numbered in order. A table with White and Black columns also works. Byes are skipped. Everything is processed in your browser.</p>
+    </section>
+
+    <section class="panel">
+      <h2>3. Preview and print</h2>
+      <div class="stats" id="stats"></div>
+      <div class="btn-row" style="margin:0 0 12px">
+        <button type="button" id="btn-print" class="primary" disabled>Print / Save as PDF</button>
+      </div>
+      <p class="hint" style="margin:0 0 12px">On each slip the arbiter ticks the <b>I</b> square for an illegal move and the <b>W</b> square for a warning, three squares per player.</p>
+    </section>
+  </div>
+
+  <div class="preview" id="preview" aria-label="Slip preview"></div>
+  <div class="site-footer">TOURNAMENT TOOLKIT · Pairings are processed in your browser and are not uploaded or stored. Check the printed slips before the round.</div>
+</main>
+
+<script src="slips.js"></script>
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+const state = { event: '', date: '', round: '', category: '', slips: [], blank: false };
+
+const detailsComplete = () => state.event.trim() && state.date && state.round.trim();
+
+function setMsg(text, kind = '') {
+  const el = $('#msg');
+  el.textContent = text;
+  el.className = `msg ${kind}`;
+}
+
+function updateGate() {
+  const ok = !!detailsComplete();
+  for (const id of ['#paste', '#btn-upload', '#btn-blank']) $(id).disabled = !ok;
+  $('#gate').textContent = ok ? '' : 'Fill in the event name, date and round above to unlock the pairing list.';
+  $('#btn-print').disabled = !ok || !state.slips.length;
+}
+
+const iw = () => '<div class="iw"><div class="h">I</div><div class="h">W</div><div></div><div></div><div></div><div></div><div></div><div></div></div>';
+
+// The event name shrinks (down to a floor, then wraps) so it fits the title cell.
+const evSize = (name) => Math.max(5.4, Math.min(7.6, (7.6 * 24) / Math.max(name.length, 1))).toFixed(1);
+
+function slipHtml(s) {
+  const cat = state.category.trim();
+  return `<div class="cell"><div class="slip">
+    <div class="r1"><div class="c">Event</div><div class="c accent ev" style="font-size:${evSize(state.event.trim())}pt">${esc(state.event.trim())}</div><div class="c dt">Date :<span class="accent">${esc(formatSlipDate(state.date))}</span></div></div>
+    <div class="r2"><div class="c">Category</div><div class="c fill">${esc(cat)}</div><div class="c">Round</div><div class="c fill">${esc(state.round.trim())}</div><div class="c">Table</div><div class="c fill">${esc(s.table)}</div><div class="c">Arbiter Sign</div><div class="c"></div></div>
+    <div class="main">
+      ${iw()}
+      <div class="pl"><div class="h">Name White</div><div class="nm">${esc(s.white)}</div><div class="sg">Sign :</div></div>
+      <div class="rs"><div class="h">Result</div><div></div></div>
+      ${iw()}
+      <div class="pl"><div class="h">Name Black</div><div class="nm">${esc(s.black)}</div><div class="sg">Sign :</div></div>
+    </div>
+  </div></div>`;
+}
+
+function render() {
+  const slips = state.blank
+    ? Array.from({ length: SLIPS_PER_SHEET }, () => ({ table: '', white: '', black: '' }))
+    : state.slips;
+  const sheets = chunk(slips, SLIPS_PER_SHEET);
+  $('#preview').style.setProperty('--slip-accent', $('#f-color').value);
+  $('#preview').innerHTML = sheets.map((sh) => {
+    const filled = sh.map(slipHtml);
+    while (filled.length % 2) filled.push('<div class="cell"></div>');
+    return `<div class="sheet">${filled.join('')}</div>`;
+  }).join('');
+  const n = state.blank ? 0 : slips.length;
+  $('#stats').innerHTML = state.blank
+    ? '<span>Blank sheet: <b>16</b> slips, <b>1</b> page</span>'
+    : slips.length ? `<span>Slips: <b>${n}</b></span><span>Pages: <b>${sheets.length}</b></span>` : '';
+  $('#btn-print').disabled = !detailsComplete() || !(state.blank || state.slips.length);
+}
+
+function applyText(text) {
+  state.blank = false;
+  try {
+    const res = parsePairings(text);
+    state.slips = res.slips;
+    setMsg(`${res.slips.length} board${res.slips.length > 1 ? 's' : ''} found.`, 'ok');
+    const w = res.warnings.map((m) => `<div class="notice">${esc(m)}</div>`).join('');
+    $('#warns').innerHTML = w;
+  } catch (err) {
+    state.slips = [];
+    $('#warns').innerHTML = '';
+    setMsg(text.trim() ? err.message : '', text.trim() ? 'error' : '');
+  }
+  render();
+}
+
+for (const el of document.querySelectorAll('[data-f]')) {
+  el.addEventListener('input', () => {
+    state[el.dataset.f] = el.value;
+    updateGate();
+    render();
+  });
+}
+$('#f-color').addEventListener('change', render);
+$('#paste').addEventListener('input', (e) => applyText(e.target.value));
+$('#btn-blank').addEventListener('click', () => { state.blank = true; state.slips = []; $('#warns').innerHTML = ''; setMsg('Blank sheet: write the table, names and round by hand.', 'ok'); render(); });
+$('#btn-print').addEventListener('click', () => window.print());
+
+$('#btn-upload').addEventListener('click', () => $('#file').click());
+$('#file').addEventListener('change', async (e) => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  if (!window.XLSX) return setMsg('Spreadsheet library did not load. Check your internet connection and refresh.', 'error');
+  try {
+    const wb = XLSX.read(await f.arrayBuffer(), { type: 'array' });
+    let found = null, lastErr = null;
+    for (const name of wb.SheetNames) {
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, defval: '', raw: false })
+        .map((r) => r.map((v) => String(v ?? '').trim()));
+      try { found = { rows, res: parsePairings(rows) }; break; } catch (err) { lastErr = err; }
+    }
+    if (!found) throw lastErr || new PairingError('No pairing table found in this file.');
+    $('#paste').value = found.rows.map((r) => r.join('\t')).join('\n');
+    applyText($('#paste').value);
+  } catch (err) {
+    setMsg(err.message || 'The file could not be read.', 'error');
+  }
+});
+
+const SAMPLE = [
+  'Bo.\tNo.\tName\tRtg\tPts.\tResult\tPts.\tName\tRtg\tNo.',
+  '1\t5\tELOYSIUS SHU JUN HAO\t1488\t4\t\t4\tSHAHRULNIZAM MOHD SHOHOD\t1626\t3',
+  '2\t4\tKOH WEI JIE\t1502\t3,5\t\t3\tMD MONIR HOSSAIN\t1873\t1',
+  '3\t7\tAFNAN HILMI BIN ISHAK\t0\t3\t\t2,5\tMUHAMMAD SOLAAHUDDIN SAHRIL BIN ABDUL H\t0\t12',
+  '4\t9\tBRYAN LOH\t0\t2,5\t\t2,5\tAYSH AZFAR BIN MD HAIROL\t0\t8',
+  '5\t2\tSAIFUL ISLAM PUAL BIN ABDULLAH\t1769\t1,5\t\t1,5\tNGASIMAN HJ SAPUAN\t1427\t6',
+  '6\t10\tMUHAMMAD FIRAS ADAM BIN MOHD RIZUAN\t0\t1\t\t1\tMUHAMMAD IRFAN AQIL BIN ZULKIFLI\t0\t11',
+].join('\n');
+$('#btn-sample').addEventListener('click', () => {
+  Object.assign(state, { event: 'SAMPLE OPEN CHESS TOURNAMENT', date: '2026-09-20', round: '3', category: 'OPEN' });
+  for (const el of document.querySelectorAll('[data-f]')) el.value = state[el.dataset.f];
+  updateGate();
+  $('#paste').value = SAMPLE;
+  applyText(SAMPLE);
+});
+
+updateGate();
+render();
+</script>
+</body>
+</html>
