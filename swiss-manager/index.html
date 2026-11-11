@@ -78,7 +78,7 @@ function renderMapping(){
 }
 function sample(t){const i=state.map[t];if(i==null||i<0)return "—";const r=state.rows.find(r=>String(r[i]??"").trim());return r?String(r[i]):"—"}
 function readSheet(){
- if(!state.wb)return;const aoa=XLSX.utils.sheet_to_json(state.wb.Sheets[$("sheet").value],{header:1,defval:"",raw:false});const hi=+$("headerRow").value;state.headers=(aoa[hi]||[]).map(v=>String(v??""));state.rows=aoa.slice(hi+1).filter(r=>r.some(v=>String(v??"").trim()!==""));renderMapping();
+ if(!state.wb)return;const aoa=XLSX.utils.sheet_to_json(state.wb.Sheets[state.wb.SheetNames[+$("sheet").value]],{header:1,defval:"",raw:false});const hi=+$("headerRow").value;state.headers=(aoa[hi]||[]).map(v=>String(v??""));state.rows=aoa.slice(hi+1).filter(r=>r.some(v=>String(v??"").trim()!==""));renderMapping();
  const date=$("registrationDate");makeOptions(date,state.headers,true);date.options[0].textContent="— Select registration date column —";let pref=state.headers.findIndex(h=>["registration date","registered date","date registered","registration timestamp","registered at","created at","date of registration"].includes(norm(h)));date.value=String(pref);
  ["mappingPanel","rulesPanel","validationPanel"].forEach(id=>$(id).classList.remove("hidden"));validate();
 }
