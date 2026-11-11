@@ -118,9 +118,10 @@
       <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden>
       <div class="btn-row">
         <button type="button" id="btn-upload">Upload Excel / CSV file</button>
-        <button type="button" id="btn-blank">Blank sheet (no names)</button>
+        <button type="button" id="btn-blank">Blank sheet (details only)</button>
         <button type="button" id="btn-sample">Use sample pairings</button>
       </div>
+      <p class="hint" id="blank-hint" style="margin:6px 0 0"></p>
       <p class="msg" id="msg" role="status" aria-live="polite"></p>
       <div id="warns"></div>
       <p class="hint">The first <b>Name</b> column is White and the second is Black. The <b>Bo.</b> / Board / Table column gives the table number; without one, tables are numbered in order. A table with White and Black columns also works. Byes are skipped. Everything is processed in your browser.</p>
@@ -148,6 +149,8 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 const state = { event: '', date: '', round: '', category: '', slips: [], blank: false };
 
 const detailsComplete = () => state.event.trim() && state.date && state.round.trim();
+// A blank sheet carries the event name, date, category and round; only the table and player names stay empty.
+const blankComplete = () => detailsComplete() && state.category.trim();
 
 function setMsg(text, kind = '') {
   const el = $('#msg');
@@ -157,7 +160,10 @@ function setMsg(text, kind = '') {
 
 function updateGate() {
   const ok = !!detailsComplete();
-  for (const id of ['#paste', '#btn-upload', '#btn-blank']) $(id).disabled = !ok;
+  for (const id of ['#paste', '#btn-upload']) $(id).disabled = !ok;
+  $('#btn-blank').disabled = !blankComplete();
+  $('#btn-blank').title = blankComplete() ? '' : 'Enter the event name, date, category and round first';
+  $('#blank-hint').textContent = ok && !blankComplete() ? 'A blank sheet also needs the category.' : '';
   $('#gate').textContent = ok ? '' : 'Fill in the event name, date and round above to unlock the pairing list.';
   $('#btn-print').disabled = !ok || !state.slips.length;
 }
@@ -214,7 +220,7 @@ function render() {
   $('#stats').innerHTML = state.blank
     ? '<span>Blank sheet: <b>16</b> slips, <b>1</b> page</span>'
     : slips.length ? `<span>Slips: <b>${n}</b></span><span>Pages: <b>${sheets.length}</b></span>` : '';
-  $('#btn-print').disabled = !detailsComplete() || !(state.blank || state.slips.length);
+  $('#btn-print').disabled = !detailsComplete() || !(state.blank ? blankComplete() : state.slips.length);
 }
 
 function applyText(text) {
@@ -242,7 +248,7 @@ for (const el of document.querySelectorAll('[data-f]')) {
 }
 $('#f-color').addEventListener('change', render);
 $('#paste').addEventListener('input', (e) => applyText(e.target.value));
-$('#btn-blank').addEventListener('click', () => { state.blank = true; state.slips = []; $('#warns').innerHTML = ''; setMsg('Blank sheet: write the table, names and round by hand.', 'ok'); render(); });
+$('#btn-blank').addEventListener('click', () => { state.blank = true; state.slips = []; $('#warns').innerHTML = ''; setMsg('Blank sheet: the event, date, category and round are filled in; write the table and player names by hand.', 'ok'); render(); });
 $('#btn-print').addEventListener('click', () => window.print());
 
 $('#btn-upload').addEventListener('click', () => $('#file').click());

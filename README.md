@@ -29,7 +29,7 @@ Open Result Slips at `/result-slips/` to print match result slips, 16 per A4 pag
 - **Event details:** event name, date and round are required; category is optional. The event name and date print in red (or orange or black).
 - **Pairings:** paste the round's pairing table copied from Chess-Results or Swiss Manager (or upload XLSX/CSV). The first `Name` column is White, the second is Black, and the `Bo.` / Board / Table column gives the table number (otherwise tables are numbered in order). A table with `White` and `Black` columns, or plain `table, white, black` lines, also works. Byes are skipped.
 - **Each slip:** event, date, category, round, table, arbiter signature, White and Black names with a signature line each, a result box, and tick squares for **I** (illegal move) and **W** (warning), three per player.
-- **Output:** a live preview and Print / Save as PDF. A blank sheet can be printed for hand-written slips.
+- **Output:** a live preview and Print / Save as PDF. A blank sheet (event name, date, category and round filled in; table and player names left empty) can be printed for hand-written slips, so all four details are required for it.
 
 ## Tests
 
